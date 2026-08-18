@@ -28,7 +28,7 @@ export class HttpRequestInterceptor implements HttpInterceptor {
   isRefreshingToken = false;
 
   requestCount = 0;
-  requestCache = new Map<any, Observable<HttpEvent<any>>>();
+  requestCache = new Map<any, Observable<any>>();
 
   constructor(
     private authService: AuthService,
@@ -58,8 +58,8 @@ export class HttpRequestInterceptor implements HttpInterceptor {
 
     const thisKey = this.stableStringify({url: req.urlWithParams, body: req.body});
 
-    if(this.requestCache.has(thisKey)){
-        return this.requestCache.get(thisKey);
+    if (this.requestCache.has(thisKey)) {
+      return this.requestCache.get(thisKey);
     }
 
     this.requestCount++;
@@ -107,7 +107,7 @@ export class HttpRequestInterceptor implements HttpInterceptor {
           });
         }
         else if (error.status === 401) {
-          return this.handleUnauthorized(req, next);
+          return this.route.navigate(['/login']);
         }
         else if (error.status === 500 && error.message.startsWith('JWT expired ')) {
           this.messageSrv.add({
@@ -126,7 +126,7 @@ export class HttpRequestInterceptor implements HttpInterceptor {
         }));
       }),
       finalize(() => {
-            this.requestCount--
+            this.requestCount--;
             setTimeout(() => this.requestCache.delete(thisKey), 5_000);
         }),
         shareReplay(1)
@@ -191,17 +191,33 @@ export class HttpRequestInterceptor implements HttpInterceptor {
   }
 
     stableStringify(obj: any): string {
-        if (obj === null || typeof obj !== 'object') {
-            return JSON.stringify(obj);
-        }
+      if (obj === null || typeof obj !== 'object') {
+        return JSON.stringify(obj);
+      }
 
-        if (Array.isArray(obj)) {
-            return `[${obj.map(x => this.stableStringify(x)).join(',')}]`;
-        }
+      // 1. Trata FormData (lê os campos e os arquivos)
+      if (obj instanceof FormData) {
+        const entries: string[] = [];
+        obj.forEach((value, key) => {
+          if (value instanceof File) {
+            // Se for arquivo, usa nome + tamanho + última modificação pra gerar uma assinatura única
+            entries.push(`"${key}":File(${value.name}_${value.size}_${value.lastModified})`);
+          } else {
+            entries.push(`"${key}":${JSON.stringify(value)}`);
+          }
+        });
+        // Ordena pra garantir estabilidade da chave
+        return `{${entries.sort().join(',')}}`;
+      }
 
-        // Ordena chaves antes de serializar
-        const keys = Object.keys(obj).sort();
-        const entries = keys.map(key => `"${key}":${this.stableStringify(obj[key])}`);
-        return `{${entries.join(',')}}`;
+      // 2. Trata Arrays
+      if (Array.isArray(obj)) {
+        return `[${obj.map(x => this.stableStringify(x)).join(',')}]`;
+      }
+
+      // 3. Trata Objetos comuns
+      const keys = Object.keys(obj).sort();
+      const entries = keys.map(key => `"${key}":${this.stableStringify(obj[key])}`);
+      return `{${entries.join(',')}}`;
     }
 }

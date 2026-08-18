@@ -27,6 +27,8 @@ import { MinLengthTextCustomValidator } from 'src/app/shared/utils/minLengthText
 import { WorkpackModelService } from 'src/app/shared/services/workpack-model.service';
 import { CancelButtonComponent } from 'src/app/shared/components/cancel-button/cancel-button.component';
 import { WorkpackBreadcrumbStorageService } from 'src/app/shared/services/workpack-breadcrumb-storage.service';
+import { IOrganization } from 'src/app/shared/interfaces/IOrganization';
+import { OrganizationService } from 'src/app/shared/services/organization.service';
 
 interface ICardItemRole {
   type: string;
@@ -54,6 +56,8 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
   workpack: IWorkpack;
   idOffice: number;
   idPerson: number;
+  selectedOrganization: IOrganization; //add
+  resultOrganizationsByName: IOrganization[]; //add
   personRolesOptions: { label: string; value: string }[];
   person: IPerson;
   cardPerson: ICard;
@@ -120,7 +124,8 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
     private planSrv: PlanService,
     private authSrv: AuthService,
     private workpackModelSrv: WorkpackModelService,
-    private breadcrumbStorageSrv: WorkpackBreadcrumbStorageService
+    private breadcrumbStorageSrv: WorkpackBreadcrumbStorageService,
+    private organizationSrv: OrganizationService    //add
   ) {
     this.citizenUserSrv.loadCitizenUsers();
     this.actRouter.queryParams.subscribe(async queryParams => {
@@ -163,6 +168,7 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
     await this.getAuthServer();
     this.isUserAdmin = await this.authSrv.isUserAdmin();
     await this.loadWorkpack();
+    await this.loadOrganizations();
     await this.loadStakeholder();
     this.setBreadcrumb();
   }
@@ -217,7 +223,10 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
 
   async loadWorkpack() {
     const workpackData = this.workpackSrv.getWorkpackData();
-    if (workpackData && workpackData.workpack && workpackData.workpack.id === this.idWorkpack && workpackData.workpackModel) {
+    const cachedPermissionsAreAvailable = this.isUserAdmin
+      || Array.isArray(workpackData?.workpack?.permissions);
+    if (workpackData && workpackData.workpack && workpackData.workpack.id === this.idWorkpack
+      && workpackData.workpackModel && cachedPermissionsAreAvailable) {
       this.workpack = workpackData.workpack;
       this.personRolesOptions = workpackData.workpackModel.personRoles?.map(role => ({
         label: role,
@@ -241,7 +250,10 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
     if (this.isUserAdmin) {
       this.editPermission = !this.workpack.canceled;
     } else {
-      this.editPermission = (this.workpack.permissions && this.workpack.permissions.filter(p => p.level === 'EDIT').length > 0) && !this.workpack.canceled;
+      this.editPermission = (
+          this.workpack.permissions
+          && this.workpack.permissions.filter(p => p.level === 'EDIT').length > 0
+        ) && !this.workpack.canceled;
     }
     const resultPlan = await this.planSrv.getCurrentPlan(this.idPlan);
     if (resultPlan) {
@@ -441,7 +453,10 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
         address: this.stakeholder.person.address,
         phoneNumber: this.formatPhoneNumber(this.stakeholder.person.phoneNumber),
         contactEmail: this.stakeholder.person.contactEmail
+        
       });
+
+       this.selectedOrganization = this.stakeholder.person.organization ?? null //add
       const now = new Date();
 
       this.stakeholderRoles =
@@ -451,7 +466,7 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
 
           return {
             id: role.id,
-            active: expired ? false : role.active, // 👈 REGRA AQUI
+            active: expired ? false : role.active, 
             role: role.role,
             from: new Date(role.from + 'T00:00:00'),
             to: toDate
@@ -472,9 +487,9 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
           };
         });
       localStorage.setItem('@pmo/stakeholderRolesBk', JSON.stringify(this.stakeholderRolesBk));
-      if (!this.editPermission) {
-        this.stakeholderForm.disable();
-      }
+      this.editPermission
+        ? this.stakeholderForm.enable()
+        : this.stakeholderForm.disable();
       if (!this.isUserAdmin && this.idPerson === Number(this.authSrv.getIdPerson() )) {
         this.isSamePerson = true;
       }
@@ -568,8 +583,7 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       const result = await this.citizenUserSrv.GetCitizenUserByCpf({
         cpf: this.searchedCpfUser,
-        idOffice: this.idOffice,
-        loadWorkLocation: false
+        idOffice: this.idOffice
       });
 
       this.isLoading = false;
@@ -587,7 +601,13 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
 
           if (stakeholderResult.success) {
             this.stakeholder = stakeholderResult.data;
-            this.person = this.stakeholder?.person;
+            const stakeholderPerson = this.stakeholder?.person;
+            this.person = {
+              ...stakeholderPerson,
+              contactEmail: stakeholderPerson?.contactEmail || result.data?.contactEmail,
+              organization: stakeholderPerson?.organization || result.data?.organization
+            };
+            this.stakeholder.person = this.person;
             this.user = this.person.isUser;
             this.cardPerson.isLoading = false;
             this.setStakeholderForm();
@@ -661,8 +681,7 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
     const publicServer = event.value;
 
     const result = await this.citizenUserSrv.GetPublicServer(publicServer.sub, {
-      idOffice: this.idOffice,
-      loadWorkLocation: false
+      idOffice: this.idOffice
     });
 
     this.isLoading = false;
@@ -690,7 +709,13 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
 
         if (stakeholderResult.success) {
           this.stakeholder = stakeholderResult.data;
-          this.person = this.stakeholder?.person;
+          const stakeholderPerson = this.stakeholder?.person;
+          this.person = {
+            ...stakeholderPerson,
+            contactEmail: stakeholderPerson?.contactEmail || result.data?.contactEmail,
+            organization: stakeholderPerson?.organization || result.data?.organization
+          };
+          this.stakeholder.person = this.person;
           this.user = this.person.isUser;
           this.cardPerson.isLoading = false;
           this.setStakeholderForm();
@@ -709,6 +734,7 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
         phoneNumber: this.formatPhoneNumber(this.person.phoneNumber),
         contactEmail: this.person.contactEmail
       });
+      this.selectedOrganization = this.person.organization ?? null;
       if (this.person.roles && this.user) {
         this.stakeholderPermissions = this.person.roles.map(r => ({
           role: r.role ?? (r as any),
@@ -721,9 +747,10 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
         address: '',
         phoneNumber: '',
         contactEmail: ''
-      })
+      });
       this.stakeholderRoles = null;
       this.stakeholderPermissions = [];
+        this.selectedOrganization = null; 
     }
     this.loadStakeholderRolesCardsItems();
   }
@@ -802,7 +829,11 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
 
   async saveStakeholder() {
     this.cancelButton.hideButton();
-    if (!this.stakeholderForm.valid || !this.stakeholderForm.controls.fullName.value || this.stakeholderForm.controls.fullName.value.trim().length === 0) {
+    if (
+      !this.stakeholderForm.valid
+      || !this.stakeholderForm.controls.fullName.value
+      || this.stakeholderForm.controls.fullName.value.trim().length === 0
+    ) {
       return;
     }
     const validated = this.validateStakeholder();
@@ -839,7 +870,8 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
         contactEmail: this.stakeholderForm.controls.contactEmail.value,
         phoneNumber: this.stakeholderForm.controls.phoneNumber.value
           ? this.stakeholderForm.controls.phoneNumber.value.replace(/\D+/g, '') : null,
-        isUser: true
+        isUser: true,
+        organization: this.selectedOrganization,
       },
       roles: this.stakeholderRoles && this.stakeholderRoles.map(r => ({
         ...r,
@@ -908,15 +940,15 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
     // user should have permissions
     if (this.user) {
       return (this.stakeholderRolesCardItems && this.stakeholderRolesCardItems.filter( card => card.type !== 'new-role-card').length > 0)
-      || (this.stakeholderPermissions && this.stakeholderPermissions.length > 0)
+      || (this.stakeholderPermissions && this.stakeholderPermissions.length > 0);
     } else {
-      return (this.stakeholderRolesCardItems && this.stakeholderRolesCardItems.filter( card => card.type !== 'new-role-card').length > 0)
+      return (this.stakeholderRolesCardItems && this.stakeholderRolesCardItems.filter( card => card.type !== 'new-role-card').length > 0);
     }
   }
 
   handleOnCancel() {
     this.saveButton.hideButton();
-    if (this.idPerson) {
+    if (this.idPerson || this.stakeholder) {
       const stakeholderRolesBk = localStorage.getItem('@pmo/stakeholderRolesBk');
       this.stakeholderRoles = JSON.parse(stakeholderRolesBk);
       this.setStakeholderForm();
@@ -932,4 +964,19 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
       this.personSearchBy = 'SEARCH';
     }
   }
+
+  async loadOrganizations() {
+    this.isLoading = true;
+    try {
+      const result = await this.organizationSrv.GetAll({
+        'id-office': this.idOffice
+      });
+      this.resultOrganizationsByName = result.success && result.data
+        ? result.data
+        : [];
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
 }

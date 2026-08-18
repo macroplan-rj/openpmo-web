@@ -161,12 +161,13 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
         collapseble: this.showTabview ? false : true,
         isLoading: true,
         headerLabels: [],
+        progressBarValues: [],
         initialStateCollapse: this.showTabview
           ? false
           : this.collapsePanelsStatus,
       },
     };
-
+    
 
   }
 
@@ -178,56 +179,48 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
       .subscribe((reset) => {
         if (reset) {
           this.loadScheduleData();
+          this.runAllValidations();
         }
       });
 
-    if(this.runValidation) {
-      this.runAllValidations();
-      this.runValidation = false;
-    }
   }
 
   ngOnInit(): void {
 
-    this.route.queryParams.subscribe(async (params) => {
-      const idWorkpack = params.id;
-      if (!idWorkpack) return;
+  this.route.queryParams.subscribe(async (params) => {
+    const idWorkpack = params.id;
+    if (!idWorkpack) return;
 
-      try {
-        const response = await this.labelSrv
-          .getLabels(idWorkpack)
-          .toPromise();
+    try {
 
-        this.foreseenLabel = response.data[0].body.data;
-        this.tooltipLabel = response.data[0].body.data;
-        this.abbreviatedLabel = response.data[1].body.data;
+      const response = await this.labelSrv
+        .getLabels(idWorkpack)
+        .toPromise();
 
-        await this.loadScheduleData();
-        this.runValidation = true;
-      } catch (error) {
-        console.error(error);
-      }
-    });
+      this.foreseenLabel = response.data[0].body.data;
+      this.tooltipLabel = response.data[0].body.data;
+      this.abbreviatedLabel = response.data[1].body.data;
 
-    this.route.queryParams
-      .pipe(
-        map((params) => params.id),
-        switchMap((workpackId) => {
-          if (!workpackId) return EMPTY;
-          return this.scheduleCardItemSrv.getCurrentBaseline(workpackId);
-        })
-      )
-      .subscribe((response) => {
-        this.isCurrentBaseline = response.data;
-        this.scheduleCardItemSrv.isCurrentBaseline$.next(
-          this.isCurrentBaseline
-        );
-        this.loadBaseline = false;
+      const baselineResponse = await this.scheduleCardItemSrv
+        .getCurrentBaseline(idWorkpack)
+        .toPromise();
 
-        this.runValidation = true;
-      });
+      this.isCurrentBaseline = baselineResponse.data;
+      this.scheduleCardItemSrv.isCurrentBaseline$.next(
+        this.isCurrentBaseline
+      );
+      this.loadBaseline = false;
 
-  }
+      await this.loadScheduleData();
+
+      this.runAllValidations();
+
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+}
 
   ngOnDestroy(): void {
     this.$destroy.complete();
@@ -810,6 +803,8 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
         cardTitle: 'schedule',
         collapseble: this.showTabview ? false : true,
         isLoading: false,
+        headerLabels: [],
+        progressBarValues: [],
         initialStateCollapse: this.showTabview
           ? false
           : this.collapsePanelsStatus,
@@ -1753,8 +1748,8 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
 
   validateTotalFinancialExceeded() {
     if(this.isCurrentBaseline){
-      const costBar = this.sectionSchedule.cardSection.progressBarValues
-      .find(bar => bar.type === 'cost');
+      const costBar = this.sectionSchedule?.cardSection?.progressBarValues
+        ?.find(bar => bar.type === 'cost');
 
       if (!costBar || costBar.progress === costBar.baselinePlanned) return;
       const planned = costBar.baselinePlanned;
@@ -1772,8 +1767,8 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
 
   validatePhysicalReplannedDifferentFromPlanned() {
     if(this.isCurrentBaseline){
-      const bar = this.sectionSchedule.cardSection.progressBarValues
-        .find(b => b.type === 'scope');
+      const bar = this.sectionSchedule?.cardSection?.progressBarValues
+        ?.find(b => b.type === 'scope');
 
       if (!bar || bar.baselinePlanned == null || bar.baselinePlanned === 0) return;
 
@@ -1795,8 +1790,8 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
   }
 
   validateTotalScopeReached() {
-    const scopeBar = this.sectionSchedule.cardSection.progressBarValues
-      .find(bar => bar.type === 'scope');
+    const scopeBar = this.sectionSchedule?.cardSection?.progressBarValues
+      ?.find(bar => bar.type === 'scope');
 
     if (!scopeBar) return;
 
@@ -1822,8 +1817,8 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
 
   validateReplannedFinancialTotal() {
     if(this.isCurrentBaseline){
-      const costBar = this.sectionSchedule.cardSection.progressBarValues
-        .find(bar => bar.type === 'cost');
+      const costBar = this.sectionSchedule?.cardSection?.progressBarValues
+        ?.find(bar => bar.type === 'cost');
 
       if (!costBar || costBar.total === costBar.baselinePlanned) return;
 

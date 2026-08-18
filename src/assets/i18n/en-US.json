@@ -159,6 +159,13 @@
   "newSchedule": "New schedule",
   "schedule": "Schedule",
   "journal": "Journal",
+  "obligations": "Obligations",
+  "procurements": "Procurements",
+  "Agreements": "Associated Instruments",
+  "processId": "Process number",
+  "object": "Object",
+  "organizationIdentifier": "Organization/management unit code",
+  "obligationNumber": "Obligation number",
   "showInactive": "Show inactive",
   "inactive": "Inactive",
   "sector": "Sector",
@@ -331,9 +338,9 @@
   "unlink": "Unlink",
   "nonPriority": "Non-priority",
   "changeControlBoard": "Change Control Board",
-  "ccbMember": "CCB Member",
-  "ccbMembers": "CCB Members",
-  "newCcbMember": "New CCB Member",
+  "ccbMember": "Member CCM",
+  "ccbMembers": "Members CCM",
+  "newCcbMember": "New Member CCM",
   "memberAs": "Member As",
   "partner": "Partner",
   "sponsor": "Sponsor",
@@ -663,7 +670,7 @@
     "invalidCPF": "Invalid CPF.",
     "loading": "Loading",
     "atentionCancellingMessage": "Heads up. This action cannot be undone.",
-    "textAtentionCancellingMessage": "Confirm sending this proposal to cancel the project to the CCB?",
+    "textAtentionCancellingMessage": "Confirm sending this proposal to cancel the project to the CCM?",
     "stateDepartmentFooterNotice": "State Department for Economy and Planning - Government of Espírito Santo",
     "proudlyFooterNotice": "Proudly produced and maintained by:",
     "licenseFooterNotice": "Distributed under the",
@@ -673,6 +680,11 @@
       "thereAreNotCostAccounts": "There are not cost accounts"
     },
     "error": {
+      "citizen": {
+        "not": {
+          "found": "The informed user must have or create an Acesso Cidadão account."
+        }
+      },
       "link": {
         "already": {
           "exists": "This office has linked workpack in this office. You need to unlink this to revoke the sharing."
@@ -716,6 +728,11 @@
           }
         }
       },
+      "agreement": {
+        "already": {
+          "exists": "This contract or cooperation agreement has already been added to this item."
+        }
+      },
       "generic": "We were unable to process your request",
       "unauthorized": "You do not have permission to access this functionality",
       "expired": "Your session is expired. Please login again.",
@@ -723,7 +740,7 @@
       "couldNotCheckParentProject": "Could not check if contains parent project",
       "ccb-member": {
         "not": {
-          "found": "CCB member not found"
+          "found": "CCM member not found"
         }
       },
       "office": {
@@ -837,7 +854,8 @@
       "risk": {
         "has-issue-relationship": "This risk can not be deleted because it has a related issue."
       }
-    }
+    },
+    "obligationNotFound": "Obligation note not found"
   },
   "field": "Field",
   "possibleRolesPerson": "Possible roles of a person",
@@ -1078,5 +1096,28 @@
 
   "baseline-disabled-submission-warning": "Impossible to submit Baseline with pending items",
   "languages": "Languages",
-  "minLengthSearch": "Type at least 3 characters"
+  "minLengthSearch": "Type at least 3 characters",
+
+  "obligation": "Obligation",
+  "newObligation": "New Obligation",
+  "managementUnit": "Management Unit",
+  "obligationNote": "Obligation Note",
+  "cnpj": "CNPJ",
+  "protocol": "Protocol",
+  "numOriginal": "Original Number",
+  "agreementSearchAnd": "and",
+  "agreementSearchOr": "or",
+
+  "procurement": "Procurement",
+  "newProcurement": "New Procurement",
+  "year": "Year",
+  "modality": "Modality",
+
+  "cooperation": "Agreements and Cooperation Agreements",
+  "newCooperation": "New Agreement or Cooperation Agreement",
+  "grantorBeneficiaryName": "Grantor / Beneficiary Name",
+
+  "contract": "Contract",
+  "newContract": "New Contract",
+  "supplier": "Supplier"
 }
