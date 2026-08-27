@@ -117,12 +117,41 @@ export class ReportViewComponent implements OnInit, OnDestroy {
     this.isLoading = false;
     if (result.success) {
       this.reportModel = result.data;
+      if (!this.modeloPertenceAoPlano()) {
+        return;
+      }
       this.reportFormat = this.reportModel.preferredOutputFormat;
       this.loadCardProperties();
       this.instancePropertiesModel();
       this.checkProperties();
       this.setBreadcrumb();
     }
+  }
+
+  /**
+   * A tela aceita qualquer modelo pelo id da query string. Sem esta conferencia,
+   * abrir por link salvo ou trocar de plano com a tela aberta monta a tela de um
+   * relatorio de outro modelo de plano, que so pode gerar arquivo vazio.
+   */
+  modeloPertenceAoPlano(): boolean {
+    const armazenado = localStorage.getItem('@pmo/propertiesCurrentPlan');
+    const plano = armazenado ? JSON.parse(armazenado) : undefined;
+    const doPlano = plano && plano.idPlanModel;
+    const doModelo = this.reportModel && this.reportModel.idPlanModel;
+    // Sem um dos dois lados nao da para afirmar divergencia: segue o fluxo.
+    if (!doPlano || !doModelo || Number(doPlano) === Number(doModelo)) {
+      return true;
+    }
+    this.generateReportEnabled = false;
+    if (this.reportViewProperties) {
+      this.reportViewProperties.isLoading = false;
+    }
+    this.messageSrv.add({
+      detail: this.translateSrv.instant('messages.reportModelNotOfPlan'),
+      severity: 'warn',
+      summary: this.translateSrv.instant('atention')
+    });
+    return false;
   }
 
   async loadScope(menuItems: IMenuWorkpack[]) {
@@ -433,30 +462,46 @@ export class ReportViewComponent implements OnInit, OnDestroy {
     }
     this.prepareScope();
     this.isGenerating = true;
-    const reportParams = this.reportProperties.map(p => p.getValues());
-    const sender: IReportGenerate = {
-      idReportModel: this.idReportModel,
-      idPlan: this.idPlan,
-      params: reportParams,
-      scope: this.scope,
-      format: this.reportFormat
-    };
-    const result = await this.reportSrv.generateReport(sender);
+    try {
+      const reportParams = this.reportProperties.map(p => p.getValues());
+      const sender: IReportGenerate = {
+        idReportModel: this.idReportModel,
+        idPlan: this.idPlan,
+        params: reportParams,
+        scope: this.scope,
+        format: this.reportFormat
+      };
+      const result = await this.reportSrv.generateReport(sender);
 
-    if(result.status === 400 && String(result.body).includes(this.reportSrv.REPORT_GENERATE_SCOPE_PARAMETER_INVALID)) {
-      this.messageSrv.add({
-        detail: this.translateSrv.instant('Nenhum projeto disponível para gerar o relatório'),
-        severity: 'error',
-        summary: this.translateSrv.instant('error')
-      });
-      return;
-    }
+      // O backend responde com a chave de negocio tanto para escopo vazio quanto
+      // para escopo que nao resolve para nenhum workpack vivo. O corpo chega como
+      // Blob por causa do responseType, entao precisa ser lido como texto.
+      if (result.status === 400) {
+        const corpo = await this.lerCorpoDeErro(result.body);
+        const semEscopo = corpo.includes(this.reportSrv.REPORT_GENERATE_SCOPE_PARAMETER_INVALID);
+        this.messageSrv.add({
+          detail: semEscopo
+            ? this.translateSrv.instant('messages.reportScopeEmpty')
+            : this.translateSrv.instant('messages.reportGenerateError'),
+          severity: 'error',
+          summary: this.translateSrv.instant('error')
+        });
+        return;
+      }
 
-    if (result.body) {
+      if (!result.body) {
+        this.messageSrv.add({
+          detail: this.translateSrv.instant('messages.reportGenerateError'),
+          severity: 'error',
+          summary: this.translateSrv.instant('error')
+        });
+        return;
+      }
+
       const contentDispositionTotal = result.headers.get('Content-Disposition');
       const contentDisposition = contentDispositionTotal && contentDispositionTotal.split('=');
       const filename = contentDisposition && contentDisposition.length ? contentDisposition[1] : this.reportModel.name;
-      const blob = result.body.data;
+      const blob = result.body.data ? result.body.data : result.body;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.style.display = 'none';
@@ -466,7 +511,25 @@ export class ReportViewComponent implements OnInit, OnDestroy {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
+    } finally {
+      // Sem o finally, qualquer caminho de erro deixava o botao preso em
+      // "gerando" ate o usuario recarregar a tela.
       this.isGenerating = false;
+    }
+  }
+
+  /** O corpo de erro chega como Blob porque a chamada pede responseType blob. */
+  private async lerCorpoDeErro(corpo: any): Promise<string> {
+    if (!corpo) {
+      return '';
+    }
+    try {
+      if (corpo instanceof Blob) {
+        return await corpo.text();
+      }
+      return typeof corpo === 'string' ? corpo : JSON.stringify(corpo);
+    } catch {
+      return '';
     }
   }
 

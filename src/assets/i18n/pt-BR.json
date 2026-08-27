@@ -30,7 +30,7 @@
   "preferredFormat": "Formato preferencial",
   "reportModels": "Modelos de relatórios",
   "reports": "Relatórios",
-  "generateReport":"Gerar Relatório",
+  "generateReport": "Gerar Relatório",
   "notFoundBaselineOnStatus": "Não foram encontradas linhas de base nesta situação",
   "WAITING_MY_EVALUATION": "Aguardando minha avaliação",
   "WAITING_OTHERS_EVALUATIONS": "Aguardando demais avaliações",
@@ -795,24 +795,24 @@
           "error": "Problemas ao tentar colar o pacote de trabalho."
         },
         "has": {
-            "less": {
-                "then": {
-                    "required": {
-                        "milestone": {
-                            "amount": {
-                                "error": "O projeto deve possuir pelo menos {{0}} marcos críticos para submissão da Linha de Base."
-                            }
-                        }
-                    }
+          "less": {
+            "then": {
+              "required": {
+                "milestone": {
+                  "amount": {
+                    "error": "O projeto deve possuir pelo menos {{0}} marcos críticos para submissão da Linha de Base."
+                  }
                 }
-            },
-            "no": {
-                "planned": {
-                    "work": {
-                        "error": "Não é possível submeter uma Linha de Base sem escopo"
-                    }
-                }
+              }
             }
+          },
+          "no": {
+            "planned": {
+              "work": {
+                "error": "Não é possível submeter uma Linha de Base sem escopo"
+              }
+            }
+          }
         }
       },
       "permission": {
@@ -885,7 +885,10 @@
         "has-issue-relationship": "Não é possível excluir o risco pois está associado a uma ocorrência."
       }
     },
-    "obligationNotFound": "Nota de obrigação não encontrada"
+    "obligationNotFound": "Nota de obrigação não encontrada",
+    "reportScopeEmpty": "Nenhum projeto disponível no escopo selecionado. Escolha ao menos um item que você tenha acesso.",
+    "reportGenerateError": "Não foi possível gerar o relatório. Tente novamente; se persistir, avise a equipe técnica.",
+    "reportModelNotOfPlan": "Este relatório pertence a outro modelo de plano e não pode ser gerado no plano atual."
   },
   "field": "Campo",
   "possibleRolesPerson": "Possíveis papéis de pessoa",
@@ -1117,7 +1120,6 @@
   "authorized": "Autorizado",
   "indicator.name": "Nome do indicador. Informação obrigatória.",
   "indicator.description": "Descrição do indicador. Informação obrigatória.",
-
   "workpack-eap-alert-pending-items": "Verifique itens pendentes abaixo",
   "workpack-eap-alert-deleted-item": "Este item foi excluído",
   "workpack-eap-alert-new-item": "Item novo fora da Linha de Base ativa",
@@ -1125,14 +1127,12 @@
   "workpack-eap-alert-no-scope": "Entrega sem escopo",
   "workpack-eap-alert-to-cancel": "Item a cancelar. Requer aprovação de nova Linha de Base",
   "workpack-eap-alert-deleted-items-below": "Existem entregas excluídas nesse item",
-
   "NO_SCHEDULE": "Entrega sem cronograma",
   "UNDEFINED_SCOPE": "Entrega sem escopo",
   "baseline-less-then-required-milestone": "O projeto deve possuir pelo menos {{0}} marcos críticos para submissão da Linha de Base.",
   "baseline-not-have-required-plannedWork": "Não é possível submeter uma Linha de Base sem escopo",
   "baseline-disabled-submission-warning": "Impossível submeter Linha de Base com pendências",
   "languages": "Idiomas",
-
   "obligation": "Empenho",
   "newObligation": "Novo Empenho",
   "managementUnit": "Unidade Gestora",
@@ -1143,17 +1143,13 @@
   "agreementSearchAnd": "e",
   "agreementSearchOr": "ou",
   "year": "Ano",
-
   "procurement": "Licitação",
   "newProcurement": "Nova Licitação",
   "modality": "Modalidade",
-
   "cooperation": "Acordos e Convênios",
   "newCooperation": "Novo Acordo ou Convênio",
   "grantorBeneficiaryName": "Nome Concedente / Convenente",
-
   "contract": "Contrato",
   "newContract": "Novo Contrato",
   "supplier": "Fornecedor"
-
 }

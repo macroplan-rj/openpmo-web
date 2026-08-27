@@ -30,7 +30,7 @@
   "parameters": "Parameters",
   "preferredFormat": "Preferred format",
   "reportModels": "Report Models",
-  "generateReport":"Generate Report",
+  "generateReport": "Generate Report",
   "notFoundBaselineOnStatus": "Not found baselines on this status",
   "WAITING_MY_EVALUATION": "Waiting for my evaluation",
   "WAITING_OTHERS_EVALUATIONS": "Waiting for evaliations from others",
@@ -699,8 +699,8 @@
             "error": "Problems trying to save the file."
           }
         }
-      }
-     , "report-design": {
+      },
+      "report-design": {
         "generate": {
           "scope": {
             "parameter": {
@@ -792,7 +792,6 @@
           }
         }
       },
-
       "planModel": {
         "delete": {
           "relationship": {
@@ -855,7 +854,10 @@
         "has-issue-relationship": "This risk can not be deleted because it has a related issue."
       }
     },
-    "obligationNotFound": "Obligation note not found"
+    "obligationNotFound": "Obligation note not found",
+    "reportScopeEmpty": "No project available in the selected scope. Choose at least one item you have access to.",
+    "reportGenerateError": "The report could not be generated. Try again; if it persists, contact the technical team.",
+    "reportModelNotOfPlan": "This report belongs to another plan model and cannot be generated for the current plan."
   },
   "field": "Field",
   "possibleRolesPerson": "Possible roles of a person",
@@ -1082,7 +1084,6 @@
   "authorized": "Authorized",
   "indicator.name": "Name of the indicator. Mandatory information.",
   "indicator.description": "Description of the indicator. Mandatory information.",
-
   "workpack-eap-alert-pending-items": "Verify pending items below",
   "workpack-eap-alert-deleted-item": "This item has been deleted",
   "workpack-eap-alert-new-item": "New item outside the active Baseline",
@@ -1090,14 +1091,11 @@
   "workpack-eap-alert-no-scope": "Delivery without scope",
   "workpack-eap-alert-to-cancel": "Item to be canceled. Requires approval of a new Baseline",
   "workpack-eap-alert-deleted-items-below": "There are Deliveries that were deleted in this Item",
-
   "NO_SCHEDULE": "Delivery without schedule",
   "UNDEFINED_SCOPE": "Delivery without scope",
-
   "baseline-disabled-submission-warning": "Impossible to submit Baseline with pending items",
   "languages": "Languages",
   "minLengthSearch": "Type at least 3 characters",
-
   "obligation": "Obligation",
   "newObligation": "New Obligation",
   "managementUnit": "Management Unit",
@@ -1107,16 +1105,13 @@
   "numOriginal": "Original Number",
   "agreementSearchAnd": "and",
   "agreementSearchOr": "or",
-
   "procurement": "Procurement",
   "newProcurement": "New Procurement",
   "year": "Year",
   "modality": "Modality",
-
   "cooperation": "Agreements and Cooperation Agreements",
   "newCooperation": "New Agreement or Cooperation Agreement",
   "grantorBeneficiaryName": "Grantor / Beneficiary Name",
-
   "contract": "Contract",
   "newContract": "New Contract",
   "supplier": "Supplier"

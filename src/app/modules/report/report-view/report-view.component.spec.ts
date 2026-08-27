@@ -115,4 +115,75 @@ describe('ReportViewComponent', () => {
     expect(component.reportScope[0].data).toBe(ID_PLAN);
     expect(component.reportScope[0].children.length).toBe(MENU_ITEMS.length);
   });
+
+  // Regressao SA-528: nenhum caminho de erro resetava isGenerating, e o botao
+  // ficava preso em "gerando" ate o usuario recarregar a tela.
+  describe('estado do botao de geracao', () => {
+    beforeEach(() => {
+      component.reportModel = { id: 923, name: 'Ficha GIP', idPlanModel: 682 } as any;
+      component.reportProperties = [];
+      component.generateReportEnabled = true;
+      component.loadScope(MENU_ITEMS);
+    });
+
+    it('libera o botao apos erro de escopo sem resultado', async () => {
+      const srv = TestBed.inject(ReportService) as any;
+      srv.generateReport = () => Promise.resolve({
+        status: 400,
+        body: new Blob(['{"erro":"report-design.generate.scope.parameter.invalid"}']),
+        headers: { get: () => null }
+      });
+
+      await component.handleGenerateReport();
+
+      expect(component.isGenerating).toBeFalse();
+    });
+
+    it('libera o botao quando a resposta nao traz corpo', async () => {
+      const srv = TestBed.inject(ReportService) as any;
+      srv.generateReport = () => Promise.resolve({ status: 500, body: null, headers: { get: () => null } });
+
+      await component.handleGenerateReport();
+
+      expect(component.isGenerating).toBeFalse();
+    });
+
+    it('libera o botao quando a chamada rejeita', async () => {
+      const srv = TestBed.inject(ReportService) as any;
+      srv.generateReport = () => Promise.reject(new Error('rede'));
+
+      await expectAsync(component.handleGenerateReport()).toBeRejected();
+
+      expect(component.isGenerating).toBeFalse();
+    });
+  });
+
+  // Regressao SA-528: a tela aceitava qualquer modelo pelo id da query string.
+  describe('modelo x plano corrente', () => {
+    it('aceita o modelo do mesmo PlanModel do plano corrente', () => {
+      localStorage.setItem('@pmo/propertiesCurrentPlan',
+        JSON.stringify({ id: ID_PLAN, name: 'GIP', idPlanModel: 682 }));
+      component.reportModel = { idPlanModel: 682 } as any;
+
+      expect(component.modeloPertenceAoPlano()).toBeTrue();
+    });
+
+    it('recusa o modelo de outro PlanModel e desabilita a geracao', () => {
+      localStorage.setItem('@pmo/propertiesCurrentPlan',
+        JSON.stringify({ id: ID_PLAN, name: 'PELP 2047', idPlanModel: 39 }));
+      component.reportModel = { idPlanModel: 682 } as any;
+      component.generateReportEnabled = true;
+
+      expect(component.modeloPertenceAoPlano()).toBeFalse();
+      expect(component.generateReportEnabled).toBeFalse();
+    });
+
+    it('nao bloqueia quando o plano guardado nao informa o PlanModel', () => {
+      localStorage.setItem('@pmo/propertiesCurrentPlan',
+        JSON.stringify({ id: ID_PLAN, name: 'GIP' }));
+      component.reportModel = { idPlanModel: 682 } as any;
+
+      expect(component.modeloPertenceAoPlano()).toBeTrue();
+    });
+  });
 });
