@@ -130,6 +130,9 @@ export class ReportViewComponent implements OnInit, OnDestroy {
     const planStorage = localStorage.getItem('@pmo/propertiesCurrentPlan');
     const planProperties = JSON.parse(planStorage);
     const scopeData = menuItems;
+    // obsMenuPortfolioItems emite mais de uma vez; sem zerar aqui, o no do plano e os
+    // workpacks entram repetidos e prepareScope devolve escopo duplicado.
+    this.selectedWorkpacks = [];
     const rootNode = {
       label: planProperties && planProperties.name,
       icon: IconsEnum.Plan,
@@ -476,7 +479,7 @@ export class ReportViewComponent implements OnInit, OnDestroy {
         this.scope = this.scope.filter(itemScope => !children.includes(itemScope.data));
       }
     });
-    this.scope = this.scope.map(item => item.data);
+    this.scope = Array.from(new Set(this.scope.map(item => item.data)));
   }
 
   checkProperties(property?: PropertyTemplateModel) {

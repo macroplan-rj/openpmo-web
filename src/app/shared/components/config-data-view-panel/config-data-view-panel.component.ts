@@ -7,7 +7,6 @@ import { CookieService } from 'ngx-cookie';
 import { AuthService } from '../../services/auth.service';
 import * as moment from 'moment';
 import { Subject } from 'rxjs';
-import { EventEmitter } from 'stream';
 import { PersonService } from '../../services/person.service';
 
 @Component({

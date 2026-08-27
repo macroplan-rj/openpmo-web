@@ -12,7 +12,6 @@ import { PlanService } from './plan.service';
 import { CostAccountModelService } from './cost-account-model.service';
 import { map, tap } from "rxjs/operators";
 import { HttpHeaders, HttpParams } from '@angular/common/http';
-import { log } from 'console';
 
 interface DropdownOption {
   code: string;
