@@ -85,6 +85,14 @@
             <span class="card-item-name" [pTooltip]="properties.fullNameCardItem"
               tooltipPosition="bottom">{{properties.nameCardItem}}</span>
           </div>
+          <span class="card-item-delivery-forecast" *ngIf="properties?.deliveryForecastDate"
+            [pTooltip]="'deliveryForecast'|translate" tooltipPosition="bottom">
+            {{
+            language === 'pt-BR' ?
+            (properties?.deliveryForecastDate|date:'dd/MM/yyyy') :
+            (properties?.deliveryForecastDate|date:'yyyy/MM/dd')
+            }}
+          </span>
           <div class="triple-constraint-container" [ngStyle]="{'min-height': '21px'}">
             <i class="fas fa-dollar-sign" [ngStyle]="{color: iconCostColor}"
               *ngIf="properties?.dashboardData && properties?.dashboardData?.tripleConstraint"
@@ -391,6 +399,14 @@
               </app-doughnut-chart>
             </div>
           </p-overlayPanel>
+          <span class="card-item-delivery-forecast list" *ngIf="properties?.deliveryForecastDate"
+            [pTooltip]="'deliveryForecast'|translate" tooltipPosition="bottom">
+            {{
+            language === 'pt-BR' ?
+            (properties?.deliveryForecastDate|date:'dd/MM/yyyy') :
+            (properties?.deliveryForecastDate|date:'yyyy/MM/dd')
+            }}
+          </span>
           <div class="indexes">
             <span class="index" [ngStyle]="{color: cpiColor}" (mouseenter)="cpiPanelList.show($event)"
               *ngIf="properties?.dashboardData?.costPerformanceIndex"

@@ -275,6 +275,7 @@
   "periodicity": "Periodicity",
   "startDate": "Start date",
   "endDate": "End date",
+  "deliveryForecast": "Delivery forecast",
   "period": "Period",
   "periods": "Periods",
   "expectedGoal": "Expected Goal",

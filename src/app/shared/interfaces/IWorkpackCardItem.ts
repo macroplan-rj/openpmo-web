@@ -23,6 +23,12 @@ export interface IWorkpackCardItem {
   canceled?: boolean;
   endManagementDate?: string;
   completed?: boolean;
+  /**
+   * Previsao de entrega (yyyy-MM-dd) exibida no card e na tira.
+   * Nao reaproveitar subtitleCardItem: aquele carrega a data do Milestone e e reescrito
+   * pelo fluxo de edicao de marco.
+   */
+  deliveryForecastDate?: string;
   onNewItem?;
   dashboardData?: {
     risk?: {
