@@ -14,6 +14,9 @@
 # As dependências ficam num volume nomeado (openpmo-web-testdeps), então o primeiro uso
 # demora ~4 min e os seguintes começam na hora. Para recomeçar do zero:
 #   docker volume rm openpmo-web-testdeps
+#
+# O install usa --no-save de proposito: sem isso o npm do container reescreve o
+# package-lock.json do host (chegou a remover 17 mil linhas numa execucao).
 
 set -euo pipefail
 
@@ -44,7 +47,7 @@ docker run --rm \
     fi
     if [ ! -d node_modules/@angular ]; then
       echo '>>> instalando dependencias (primeira vez, ~4 min)...'
-      npm install --legacy-peer-deps --no-audit --no-fund --silent
+      npm install --legacy-peer-deps --no-save --no-audit --no-fund --silent
     fi
     echo '>>> ng test'
     npx ng test --watch=false --karma-config=karma.ci.js $INCLUDE
