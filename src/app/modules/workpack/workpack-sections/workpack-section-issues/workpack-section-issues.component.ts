@@ -18,6 +18,7 @@ import { Subject } from 'rxjs';
 import { IWorkpackData, IWorkpackParams } from '../../../../shared/interfaces/IWorkpackDataParams';
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { WorkpackShowTabviewService } from 'src/app/shared/services/workpack-show-tabview.service';
+import { ThemeService } from 'src/app/shared/services/theme.service';
 
 @Component({
   selector: 'app-workpack-section-issues',
@@ -52,7 +53,8 @@ export class WorkpackSectionIssuesComponent implements OnInit, OnDestroy {
     private workpackBreadcrumbStorageSrv: WorkpackBreadcrumbStorageService,
     private responsiveSrv: ResponsiveService,
     private issueSrv: IssueService,
-    private workpackShowTabviewSrv: WorkpackShowTabviewService
+    private workpackShowTabviewSrv: WorkpackShowTabviewService,
+    private themeSrv: ThemeService
   ) {
     
     this.workpackShowTabviewSrv.observable.pipe(takeUntil(this.$destroy)).subscribe(value => {
@@ -147,13 +149,35 @@ export class WorkpackSectionIssuesComponent implements OnInit, OnDestroy {
     this.totalRecordsIssues = this.sectionIssue.cardItemsSection && this.sectionIssue.cardItemsSection.length;
   }
 
+
+  /**
+   * Ícone da ocorrência conforme a natureza e o tema ativo (US-005 / SA-673).
+   *
+   * Antes o ícone era fixo em 'Issue' para toda ocorrência, e benefício ficava igual a
+   * problema. O tema decide: `es` mantém o mesmo ícone para as duas naturezas, `pb`
+   * distingue.
+   *
+   * O `iconSvg` sai daqui de propósito, e não é acessório: a regra
+   * `[class*=" app-icon"] { font-family: 'icopmo' !important }` faz com que classes do
+   * FontAwesome NÃO renderizem se `app-icon` estiver junto. Marcando iconSvg como false
+   * para a família fontawesome, o card não aplica `app-icon` e o glifo aparece — sem
+   * precisar alterar o card-item, que é usado em dezenas de telas.
+   */
+  private resolveIssueIcon(nature: string): { icon: string; iconSvg: boolean } {
+    const icones = this.themeSrv.theme.issueNatureIcons;
+    const escolhido = icones[nature] || icones.PROBLEM;
+    return {
+      icon: escolhido.className,
+      iconSvg: escolhido.family === 'app-icon'
+    };
+  }
+
   async loadSectionIssuesCards(showClosed: boolean) {
     if (this.issues && this.issues.length > 0) {
       const cardItems = !showClosed ? this.issues.filter(r => IssuesPropertiesOptions.status[r.status].value === 'OPEN').map(issue => ({
         typeCardItem: 'listItem',
-        icon: 'Issue',
+        ...this.resolveIssueIcon(issue.nature),
         iconColor: IssuesPropertiesOptions.importance[issue.importance].label,
-        iconSvg: true,
         nameCardItem: issue.name,
         itemId: issue.id,
         idAtributeName: 'idIssue',
@@ -172,9 +196,8 @@ export class WorkpackSectionIssuesComponent implements OnInit, OnDestroy {
       })) :
         this.issues.map(issue => ({
           typeCardItem: 'listItem',
-          icon: 'Issue',
+          ...this.resolveIssueIcon(issue.nature),
           iconColor: IssuesPropertiesOptions.importance[issue.importance].label,
-          iconSvg: true,
           nameCardItem: issue.name,
           itemId: issue.id,
           idAtributeName: 'idIssue',
