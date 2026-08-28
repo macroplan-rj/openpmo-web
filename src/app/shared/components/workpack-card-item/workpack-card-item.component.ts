@@ -70,6 +70,22 @@ export class WorkpackCardItemComponent implements OnInit, OnDestroy {
 
   showReasonButtons = false;
 
+  /**
+   * Modal de edicao do marco critico (US-004). Estado proprio, separado do fluxo inline
+   * de `showReasonModal`/`showReasonButtons`: o inline sai em MT-US004-02, e ate la os dois
+   * convivem sem se pisar.
+   */
+  showMilestoneEditModal = false;
+
+  /** Data em edicao no modal. So e aplicada a `milestoneDate` ao salvar. */
+  milestoneEditDate: Date = null;
+
+  /** Justificativa em edicao no modal. */
+  milestoneEditReason = '';
+
+  /** Estado do checkbox "Concluido" no modal. */
+  milestoneEditCompleted = false;
+
   milestoneMidleTextBottom: string;
 
   enable = true;
@@ -207,6 +223,180 @@ export class WorkpackCardItemComponent implements OnInit, OnDestroy {
   setMilestoneDateProperty() {
     const date = this.properties.subtitleCardItem.split('-');
     this.milestoneDate = new Date(date[0], date[1] - 1, date[2]);
+  }
+
+  /**
+   * Abre o modal de edicao do marco (US-004), partindo sempre do estado atual do card.
+   * Reabrir depois de um cancelamento nao pode herdar o que foi digitado antes.
+   */
+  openMilestoneEditModal() {
+    if (!this.properties?.editPermission || this.properties?.canceled) {
+      return;
+    }
+    this.milestoneEditDate = this.milestoneDate;
+    this.milestoneEditReason = '';
+    this.milestoneEditCompleted = !!this.properties?.completed;
+    this.showMilestoneEditModal = true;
+  }
+
+  /**
+   * Data futura é previsão, não realização — então não pode ser concluída (US-004).
+   *
+   * A comparação é feita só por ano/mês/dia. Comparar os Date inteiros classificaria
+   * "hoje às 00:00" como passado ou futuro conforme a hora da máquina, e o critério de
+   * aceite diz que HOJE habilita.
+   *
+   * Esta é a regra de UX. A proteção real está no servidor, em
+   * CompleteWorkpackService.assertDateIsValid, que recusa com DATE_IS_IN_FUTURE.
+   */
+  get isMilestoneEditDateInFuture(): boolean {
+    if (!this.milestoneEditDate) {
+      return false;
+    }
+    const escolhida = new Date(this.milestoneEditDate);
+    const hoje = new Date();
+    escolhida.setHours(0, 0, 0, 0);
+    hoje.setHours(0, 0, 0, 0);
+    return escolhida.getTime() > hoje.getTime();
+  }
+
+  /**
+   * Reage à troca de data no modal: data futura desmarca o Concluído na hora, para o
+   * usuário não confirmar algo que o servidor recusaria depois.
+   */
+  onMilestoneEditDateChange() {
+    if (this.isMilestoneEditDateInFuture) {
+      this.milestoneEditCompleted = false;
+    }
+  }
+
+  /** A justificativa é obrigatória quando o marco tem baseline ativa e a data mudou. */
+  get milestoneEditReasonRequired(): boolean {
+    return !!this.properties?.hasBaseline && this.milestoneEditDateChanged;
+  }
+
+  /** Data no modal difere da que está no card, comparando só o dia. */
+  get milestoneEditDateChanged(): boolean {
+    if (!this.milestoneEditDate) {
+      return false;
+    }
+    return moment(this.milestoneEditDate).format('yyyy-MM-DD') !==
+      moment(this.milestoneDate).format('yyyy-MM-DD');
+  }
+
+  get milestoneEditCompletedChanged(): boolean {
+    return this.milestoneEditCompleted !== !!this.properties?.completed;
+  }
+
+  /**
+   * Salva data, justificativa e conclusão pelo modal (US-004).
+   *
+   * São DOIS endpoints, porque não existe um que faça as duas coisas:
+   *   - data/justificativa -> PATCH /milestones/{id}
+   *   - conclusão          -> PATCH /workpacks/complete-deliverable/{id}, que apesar do
+   *     nome trata Milestone (CompleteWorkpackService verifica `instanceof Milestone`).
+   *
+   * Não são atômicos: se o segundo falhar, o primeiro já foi aplicado. Atomicidade exigiria
+   * endpoint novo — registrado na story como ponto para o PO, não resolvido aqui.
+   */
+  async saveMilestoneEdit() {
+    if (this.milestoneEditReasonRequired && !this.milestoneEditReason?.trim()) {
+      this.messageSrv.add({
+        severity: 'warn',
+        summary: this.translateSrv.instant('attention'),
+        detail: this.translateSrv.instant('milestoneReasonHint')
+      });
+      return;
+    }
+
+    const dataMudou = this.milestoneEditDateChanged;
+    const conclusaoMudou = this.milestoneEditCompletedChanged;
+    if (!dataMudou && !conclusaoMudou) {
+      this.closeMilestoneEditModal();
+      return;
+    }
+
+    const data = moment(this.milestoneEditDate).format('yyyy-MM-DD');
+    this.workpackSrv.nextPendingChanges(false);
+
+    if (dataMudou) {
+      const { success } = await this.workpackSrv.patchMilestoneReason(this.properties.itemId, {
+        date: data,
+        reason: this.milestoneEditReason
+      });
+      if (!success) {
+        this.notifyMilestoneSaveFailed();
+        return;
+      }
+      this.properties.subtitleCardItem = data;
+      this.setMilestoneDateProperty();
+    }
+
+    if (conclusaoMudou) {
+      try {
+        const { success } = await this.workpackSrv.completeDeliverable(
+          this.properties.itemId,
+          this.milestoneEditCompleted,
+          data
+        );
+        if (!success) {
+          this.notifyMilestoneSaveFailed();
+          return;
+        }
+      } catch (e) {
+        // O servidor recusa concluir marco com data futura (DATE_IS_IN_FUTURE). O modal já
+        // bloqueia antes, mas se o front for burlado a negativa precisa ficar visível.
+        this.notifyMilestoneSaveFailed(
+          this.isMilestoneEditDateInFuture ? 'messages.error.date.is.in.future' : undefined
+        );
+        return;
+      }
+      this.properties.completed = this.milestoneEditCompleted;
+      this.applyMilestoneStatusAfterSave();
+    }
+
+    this.showMilestoneEditModal = false;
+    this.milestoneEditReason = '';
+    this.messageSrv.add({
+      severity: 'success',
+      summary: this.translateSrv.instant('success'),
+      detail: this.translateSrv.instant('messages.savedSuccessfully')
+    });
+  }
+
+  private notifyMilestoneSaveFailed(chaveDetalhe = 'messages.error.generic') {
+    this.messageSrv.add({
+      severity: 'error',
+      summary: this.translateSrv.instant('error'),
+      detail: this.translateSrv.instant(chaveDetalhe)
+    });
+  }
+
+  /**
+   * Reflete o status no card logo após salvar, sem recarregar a EAP.
+   *
+   * Limitação consciente: distinguir "concluído" de "concluído com atraso" depende da
+   * baseline, que o card não tem — só o servidor sabe. Mostramos o status simples aqui; o
+   * refinamento aparece no próximo carregamento da EAP.
+   */
+  private applyMilestoneStatusAfterSave() {
+    if (this.milestoneEditCompleted) {
+      this.properties.statusItem = MilestoneStatusEnum.CONCLUDED;
+      return;
+    }
+    const hoje = moment().startOf('day');
+    const doMarco = moment(this.milestoneEditDate).startOf('day');
+    this.properties.statusItem = doMarco.isBefore(hoje)
+      ? MilestoneStatusEnum.LATE
+      : MilestoneStatusEnum.ON_TIME;
+  }
+
+  /** Fecha o modal descartando o que foi editado — usado pelo X e pelo Desfazer. */
+  closeMilestoneEditModal() {
+    this.showMilestoneEditModal = false;
+    this.milestoneEditDate = this.milestoneDate;
+    this.milestoneEditReason = '';
+    this.milestoneEditCompleted = !!this.properties?.completed;
   }
 
   setLanguage() {

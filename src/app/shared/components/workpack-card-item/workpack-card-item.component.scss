@@ -1350,3 +1350,193 @@
   }
 }
 
+
+// =============================================================================
+// Modal de edição do marco crítico (US-004)
+// Mockup: arquivo Dj1tzgpjUV6EbYVOehPVmP, nó 400:170.
+//
+// As cores do mockup (#30599b) são do tema PB. Aqui usamos os tokens
+// (--op-font-blue etc.) em vez do hex, senão o tema ES herdaria o azul da
+// Paraíba — e a SA-671 diz que a melhoria vale para todos os clientes.
+// Os cinzas neutros (#c4c4c4, #e3e3e3, #707070) não têm token e ficam literais.
+// =============================================================================
+::ng-deep .milestone-edit-dialog {
+  border-radius: 12px;
+  box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.22);
+
+  .p-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 18px 24px;
+    border-bottom: 1px solid #e3e3e3;
+  }
+
+  .milestone-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    .prefix {
+      color: v.$fontBlue;
+    }
+    .name {
+      font-family: v.$fontFamilyMedium;
+      font-weight: 600;
+      color: v.$fontDark;
+    }
+  }
+
+  .milestone-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    color: v.$fontLabel;
+  }
+
+  .milestone-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px 24px 22px;
+
+    .row-properties {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .section-label {
+        font-family: v.$fontFamilyMedium;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.28px;
+        text-transform: uppercase;
+        color: v.$fontBlue;
+      }
+      .completed-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        label {
+          font-size: 14px;
+          color: v.$fontDarkLight;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      .field-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #707070;
+        i {
+          font-size: 12px;
+        }
+      }
+    }
+
+    // Data ocupa 260px no mockup, não a largura toda.
+    .field-date {
+      width: 260px;
+      max-width: 100%;
+      .p-calendar .p-inputtext {
+        width: 100%;
+        border-width: 0 0 1px 0;
+        border-radius: 0;
+        border-color: #c4c4c4;
+        padding-left: 0;
+        font-size: 15px;
+        color: v.$fontDark;
+      }
+    }
+
+    .field-reason textarea {
+      width: 100%;
+      min-height: 96px;
+      border: 1px solid #c4c4c4;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 15px;
+      resize: vertical;
+      &::placeholder {
+        color: #b5b5b5;
+      }
+    }
+  }
+
+  .p-dialog-footer {
+    padding: 0 24px 22px;
+    border-top: none;
+  }
+
+  .milestone-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+
+    button {
+      height: 34px;
+      padding: 0 18px;
+      border-radius: 8px;
+      font-family: v.$fontFamilyMedium;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-undo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #fff;
+      border: 1.5px solid v.$fontBlue;
+      color: v.$fontBlue;
+    }
+
+    .btn-save {
+      background-color: v.$fontBlue;
+      border: 1.5px solid v.$fontBlue;
+      color: #fff;
+    }
+  }
+}
+
+// Data do marco + lápis de edição (US-004), nós 410:9 e 410:15 do mockup.
+// O lápis fica imediatamente à direita da data, 16px, na cor de destaque do tema.
+::ng-deep .app-milestone-card-item {
+  .milestone-date-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .milestone-edit-icon {
+      font-size: 14px;
+      color: v.$fontBlue;
+      cursor: pointer;
+      line-height: 1;
+    }
+  }
+}
+
+// Concluído travado por data futura (US-004): o checkbox fica desabilitado pelo próprio
+// PrimeNG; aqui só esmaecemos o rótulo para a razão ficar visível, não só sentida.
+::ng-deep .milestone-edit-dialog .completed-wrap.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  label { cursor: not-allowed; }
+}
+
+// Justificativa obrigatória e vazia (US-004): destaca antes de o usuário tentar salvar.
+::ng-deep .milestone-edit-dialog .field-reason textarea.required-missing {
+  border-color: var(--op-font-red, #EA5C5C);
+}
