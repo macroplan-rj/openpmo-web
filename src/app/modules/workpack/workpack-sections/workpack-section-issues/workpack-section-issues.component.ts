@@ -157,15 +157,22 @@ export class WorkpackSectionIssuesComponent implements OnInit, OnDestroy {
    * problema. O tema decide: `es` mantém o mesmo ícone para as duas naturezas, `pb`
    * distingue.
    *
-   * O `iconSvg` sai daqui de propósito, e não é acessório: a regra
+   * SEM FALLBACK, de propósito. A primeira versão caía em PROBLEM quando a natureza não
+   * vinha, e o resultado foi um bug que passou pelo deploy: a API não expunha `nature` na
+   * listagem, todo card virou problema, e o ícone errado parecia certo. Natureza
+   * desconhecida agora NÃO rende ícone — a ausência é visível e não mente.
+   *
+   * O `iconSvg` sai daqui e não é acessório: a regra
    * `[class*=" app-icon"] { font-family: 'icopmo' !important }` faz com que classes do
-   * FontAwesome NÃO renderizem se `app-icon` estiver junto. Marcando iconSvg como false
+   * FontAwesome não renderizem se `app-icon` estiver junto. Marcando iconSvg como false
    * para a família fontawesome, o card não aplica `app-icon` e o glifo aparece — sem
-   * precisar alterar o card-item, que é usado em dezenas de telas.
+   * precisar alterar o card-item, usado em dezenas de telas.
    */
   private resolveIssueIcon(nature: string): { icon: string; iconSvg: boolean } {
-    const icones = this.themeSrv.theme.issueNatureIcons;
-    const escolhido = icones[nature] || icones.PROBLEM;
+    const escolhido = this.themeSrv.theme.issueNatureIcons[nature];
+    if (!escolhido) {
+      return { icon: null, iconSvg: false };
+    }
     return {
       icon: escolhido.className,
       iconSvg: escolhido.family === 'app-icon'

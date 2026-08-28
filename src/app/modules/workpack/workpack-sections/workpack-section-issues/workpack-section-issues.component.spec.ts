@@ -12,10 +12,12 @@ import { resolveTheme } from 'src/app/shared/themes/themes';
  */
 describe('workpack-section-issues — ícone por natureza', () => {
 
-  /** Espelha resolveIssueIcon() do componente. */
+  /** Espelha resolveIssueIcon() do componente. Sem fallback, de propósito. */
   const resolverIcone = (temaNome: string, nature: string) => {
-    const icones = resolveTheme(temaNome).issueNatureIcons;
-    const escolhido = icones[nature] || icones.PROBLEM;
+    const escolhido = resolveTheme(temaNome).issueNatureIcons[nature];
+    if (!escolhido) {
+      return { icon: null, iconSvg: false };
+    }
     return { icon: escolhido.className, iconSvg: escolhido.family === 'app-icon' };
   };
 
@@ -56,14 +58,21 @@ describe('workpack-section-issues — ícone por natureza', () => {
 
   describe('robustez', () => {
 
-    it('natureza desconhecida não quebra e cai em problema', () => {
+    it('natureza desconhecida NÃO rende ícone, em vez de fingir que é problema', () => {
+      // Regressão do bug que passou pelo deploy: com fallback para PROBLEM, a API não
+      // mandando `nature` fazia todo card virar problema — ícone errado parecendo certo.
       const desconhecida = resolverIcone('pb', 'NATUREZA_QUE_NAO_EXISTE');
 
-      expect(desconhecida.icon).toBe(resolverIcone('pb', 'PROBLEM').icon);
+      expect(desconhecida.icon).toBeNull();
     });
 
-    it('natureza nula não quebra', () => {
+    it('natureza ausente também não rende ícone', () => {
+      expect(resolverIcone('pb', undefined).icon).toBeNull();
+    });
+
+    it('natureza nula não quebra e não rende ícone', () => {
       expect(() => resolverIcone('pb', null)).not.toThrow();
+      expect(resolverIcone('pb', null).icon).toBeNull();
     });
 
     it('tema desconhecido cai no padrão e segue exibindo ícone', () => {
