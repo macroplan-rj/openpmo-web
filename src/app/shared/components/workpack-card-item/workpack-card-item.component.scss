@@ -545,6 +545,19 @@
             }
           }
 
+          // Previsao de entrega na tira (US-003). Mockup: 13px, #707070, logo apos a
+          // barra de marcos. Os vizinhos usam width em %, entao ja encolhem sozinhos
+          // (flex-shrink padrao) para abrir espaco; a data e que nao pode encolher, senao
+          // quebra a leitura. Sem previsao o elemento nao existe e a tira fica identica
+          // a de hoje.
+          .card-item-delivery-forecast.list {
+            flex: 0 0 auto;
+            padding: 0 8px;
+            font-size: 13px;
+            color: #707070;
+            white-space: nowrap;
+          }
+
           .triple-constraint-container {
             width: 20%;
             justify-content: space-between;
@@ -704,6 +717,18 @@
           white-space: wrap;
           word-break: break-word;
           text-align: center;
+        }
+
+        // Previsao de entrega (US-003). Mockup: 11px, #707070, centralizada sob o nome.
+        // Sem previsao o elemento nao e renderizado — nada de altura reservada, para o
+        // card ficar identico ao de hoje.
+        .card-item-delivery-forecast {
+          width: 100%;
+          padding-top: 2px;
+          font-size: 11px;
+          color: #707070;
+          text-align: center;
+          white-space: nowrap;
         }
       }
       .right-content {

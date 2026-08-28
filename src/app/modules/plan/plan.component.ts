@@ -724,6 +724,7 @@ export class PlanComponent implements OnInit, OnDestroy {
           canceled: workpack.canceled,
           completed: workpack.completed,
           endManagementDate: workpack.endManagementDate,
+          deliveryForecastDate: workpack.deliveryForecastDate,
           dashboardData: this.loadDashboardData(workpack.dashboard, workpack.milestone, workpack.risk),
           hasBaseline: workpack.hasActiveBaseline,
           baselineName: workpack.activeBaselineName,

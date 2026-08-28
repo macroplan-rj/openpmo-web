@@ -961,6 +961,7 @@ export class WorkpackComponent implements OnDestroy, OnInit {
           canceled: workpack.deleted || workpack.canceled,
           completed: workpack.completed,
           endManagementDate: workpack.endManagementDate,
+          deliveryForecastDate: workpack.deliveryForecastDate,
           dashboardData: this.loadDashboardData(workpack.dashboard, workpack.milestone, workpack.risk),
           hasBaseline: workpack.hasActiveBaseline,
           baselineName: workpack.activeBaselineName,

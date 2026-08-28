@@ -68,6 +68,7 @@ export interface IWorkpackListCard {
     canDeleted?: boolean;
     endManagementDate?: string;
     milestoneStatus?: string;
+    deliveryForecastDate?: string; // previsao de entrega (yyyy-MM-dd), somente Deliverable e Project
     dashboard?: IWorkpackDashboard;
     risk?: {
       high: number;

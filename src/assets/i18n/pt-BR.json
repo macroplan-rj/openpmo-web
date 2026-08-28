@@ -280,6 +280,7 @@
   "measure": "Medida",
   "startDate": "Data Início",
   "endDate": "Data Fim",
+  "deliveryForecast": "Previsão de entrega",
   "periodicity": "Periodicidade",
   "period": "Período",
   "periods": "Períodos",
