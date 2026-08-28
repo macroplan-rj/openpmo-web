@@ -1,4 +1,7 @@
-import { ITheme } from '../interfaces/ITheme';
+import { ITheme, IThemeIcon } from '../interfaces/ITheme';
+
+/** Ícone histórico da ocorrência: glifo `Issue` da fonte própria (icopmo.woff). */
+const ICONE_OCORRENCIA_PADRAO: IThemeIcon = { family: 'app-icon', className: 'Issue' };
 
 export const DEFAULT_THEME_NAME = 'es';
 
@@ -15,7 +18,13 @@ const ES_THEME: ITheme = {
       src: 'assets/images/brasao_rodape.png',
       alt: 'Governo do Estado do Espírito Santo'
     }
-  ]
+  ],
+  // As duas naturezas com o mesmo ícone, de propósito: preserva a aparência atual do
+  // tema, que é usado por outros clientes.
+  issueNatureIcons: {
+    PROBLEM: ICONE_OCORRENCIA_PADRAO,
+    BENEFIT: ICONE_OCORRENCIA_PADRAO
+  }
 };
 
 const PB_THEME: ITheme = {
@@ -37,7 +46,14 @@ const PB_THEME: ITheme = {
       alt: 'CODATA - Companhia de Processamento de Dados da Paraíba',
       height: '26px'
     }
-  ]
+  ],
+  // Mockup aprovado (Dj1tzgpjUV6EbYVOehPVmP, artboard "16. Ocorrências", nó 245:2):
+  // problema é rosto triste, benefício é rosto feliz. A fonte própria não tem esses
+  // glifos; o FontAwesome, já carregado pelo angular.json, tem.
+  issueNatureIcons: {
+    PROBLEM: { family: 'fontawesome', className: 'far fa-frown' },
+    BENEFIT: { family: 'fontawesome', className: 'far fa-smile' }
+  }
 };
 
 const THEMES: { [name: string]: ITheme } = {
