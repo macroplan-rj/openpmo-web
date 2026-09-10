@@ -1,6 +1,21 @@
 import {IFile} from './IFile';
 import { IOrganization } from './IOrganization';
 
+export interface IPersonRole {
+  role: string;
+  workLocation?: string;
+}
+
+/**
+ * Formato em que os papeis chegam da API.
+ *
+ * `GET /persons/{key}` responde `PersonGetByIdDto.roles` como `List<String>`
+ * (ex.: `["citizen"]`), enquanto `CitizenDto` e `ccbmembers/PersonResponse`
+ * respondem `RoleResource` (`{ role, workLocation }`). Quem consome papeis de
+ * pessoa precisa normalizar antes de usar.
+ */
+export type IPersonRoleResponse = IPersonRole | string;
+
 export interface IPerson {
   id?: number;
   name: string;
@@ -14,7 +29,7 @@ export interface IPerson {
   cpf?: string;
   isUser?: boolean;
   officePermission?: IPersonOfficePermission;
-  roles?: { role: string; workLocation?: string }[];
+  roles?: IPersonRole[];
   administrator?: boolean;
   avatar?: IFile;
   isCcbMember?: boolean;

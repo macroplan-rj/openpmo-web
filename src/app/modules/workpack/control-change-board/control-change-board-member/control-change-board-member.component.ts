@@ -9,7 +9,7 @@ import {MessageService} from 'primeng/api';
 import {IOfficePermission} from 'src/app/shared/interfaces/IOfficePermission';
 import {ResponsiveService} from 'src/app/shared/services/responsive.service';
 import {ICard} from 'src/app/shared/interfaces/ICard';
-import {IPerson} from 'src/app/shared/interfaces/IPerson';
+import {IPerson, IPersonRole, IPersonRoleResponse} from 'src/app/shared/interfaces/IPerson';
 import {PersonService} from 'src/app/shared/services/person.service';
 import {BreadcrumbService} from 'src/app/shared/services/breadcrumb.service';
 import {SaveButtonComponent} from 'src/app/shared/components/save-button/save-button.component';
@@ -271,15 +271,40 @@ export class ControlChangeBoardMemberComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Papeis chegam da API em dois formatos: `GET /persons/{key}` devolve uma lista
+   * de strings e os demais endpoints devolvem `{ role, workLocation }`. Sem
+   * normalizar, `role.role` fica indefinido e a traducao lanca excecao, abortando
+   * a busca antes de reavaliar o botao Salvar.
+   */
+  normalizeRole(role: IPersonRoleResponse): IPersonRole {
+    if (!role) {
+      return null;
+    }
+    if (typeof role === 'string') {
+      const roleName = role.trim();
+      return roleName ? {role: roleName, workLocation: undefined} : null;
+    }
+    const roleName = typeof role.role === 'string' ? role.role.trim() : '';
+    return roleName ? {role: roleName, workLocation: role.workLocation} : null;
+  }
+
+  /** Chave vazia faz o ngx-translate lancar; papel sem traducao mantem o texto original. */
+  translateRole(role: string): string {
+    return role ? this.translateSrv.instant(role) : role;
+  }
+
   setMemberAsCcbMember(person: IPerson) {
     const current = this.idPerson ? (this.ccbMember.memberAs || []) : [];
-    const personRoles = person?.roles || [];
+    const personRoles = (person?.roles || [])
+      .map(role => this.normalizeRole(role))
+      .filter(role => !!role);
     const activateCitizenByDefault = !this.idPerson
       && personRoles.length === 1
-      && personRoles[0].role?.toLowerCase() === 'citizen';
+      && personRoles[0].role.toLowerCase() === 'citizen';
 
     const normalizedPersonRoles = personRoles.map(role => ({
-      role: this.translateSrv.instant(role.role),
+      role: this.translateRole(role.role),
       workLocation: role.workLocation
     }));
 
