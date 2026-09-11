@@ -103,8 +103,10 @@ export class ControlChangeBoardMemberComponent implements OnInit, OnDestroy {
     });
     this.debounceSearch.pipe(debounceTime(500), takeUntil(this.$destroy)).subscribe(async() => {
       if (this.searchedEmailPerson.length > 5 && this.validateEmail()) {
-        await this.searchPerson();
+        // Limpo antes: a partir daqui a mensagem pertence a busca, que a usa para
+        // avisar quando a API falha. Limpar depois apagava esse aviso.
         this.invalidMailMessage = undefined;
+        await this.searchPerson();
       } else {
         this.invalidMailMessage = this.searchedEmailPerson.length > 0 ? this.translateSrv.instant('messages.invalidEmail') : '';
         this.ccbMember.person = null;
@@ -348,27 +350,51 @@ export class ControlChangeBoardMemberComponent implements OnInit, OnDestroy {
 
   async searchPerson() {
     this.saveButton?.hideButton();
-    if (this.searchedEmailPerson) {
-      const {data} = await this.personSrv.GetByKey(this.searchedEmailPerson);
-      if (data) {
-        this.showSearchInputMessage = false;
-        this.ccbMember.person = data;
-        this.ccbMember.person.email = this.searchedEmailPerson;
-      } else {
-        const email = this.searchedEmailPerson.split('@');
-        const name = email[0];
-        this.ccbMember.person = {
-          name,
-          email: this.searchedEmailPerson,
-          roles: [{ role: 'citizen', workLocation: undefined }]
-        };
-      }
-    } else {
-      this.ccbMember.person = null;
+    try {
+      this.ccbMember.person = await this.findPersonByEmail();
+    } finally {
+      // O botao Salvar foi escondido antes da busca. Qualquer saida daqui — inclusive
+      // uma excecao — precisa reavalia-lo, senao a tela fica travada sem explicacao:
+      // e o que o usuario contorna desligando e religando o papel no switch.
+      this.setFormPerson(this.ccbMember.person);
+      this.setMemberAsCcbMember(this.ccbMember.person);
+      this.showSaveButton();
     }
-    this.setFormPerson(this.ccbMember.person);
-    this.setMemberAsCcbMember(this.ccbMember.person);
-    this.showSaveButton();
+  }
+
+  /**
+   * Tres desfechos, nao dois. O interceptor nunca rejeita: em erro ele devolve
+   * `{ success: false, data: <corpo do erro> }`. Quem olha so o `data` aceita o corpo
+   * do erro como se fosse a pessoa — e como ele nao tem `roles`, o cartao "Participa
+   * como" fica vazio e o botao Salvar some sem mensagem nenhuma.
+   *
+   * Na falha a busca nao cai no cadastro novo de proposito: sem resposta da API nao da
+   * para afirmar que a pessoa nao existe, e seguir em frente criaria pessoa duplicada.
+   */
+  private async findPersonByEmail(): Promise<IPerson> {
+    if (!this.searchedEmailPerson) {
+      return null;
+    }
+
+    const result = await this.personSrv.GetByKey(this.searchedEmailPerson);
+
+    if (result && result.success === false) {
+      this.invalidMailMessage = this.translateSrv.instant('messages.error.generic');
+      return null;
+    }
+
+    if (result?.data) {
+      this.showSearchInputMessage = false;
+      return {...result.data, email: this.searchedEmailPerson};
+    }
+
+    // 204 No Content: a pessoa nao existe e sera criada junto com o membro.
+    const [name] = this.searchedEmailPerson.split('@');
+    return {
+      name,
+      email: this.searchedEmailPerson,
+      roles: [{role: 'citizen', workLocation: undefined}]
+    };
   }
 
   validateClearSearchUserName(event) {

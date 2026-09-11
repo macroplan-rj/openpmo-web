@@ -2,6 +2,7 @@ import { FormBuilder } from '@angular/forms';
 import { of } from 'rxjs';
 
 import { ControlChangeBoardMemberComponent } from './control-change-board-member.component';
+import { SaveButtonComponent } from 'src/app/shared/components/save-button/save-button.component';
 
 /**
  * US-007 / SD #10519 — cadastro de membro do CCM bloqueado ao digitar o e-mail completo.
@@ -147,6 +148,135 @@ describe('ControlChangeBoardMemberComponent — papéis do membro do CCM', () =>
       expect(component.hasActiveMemberAs()).toBeFalse();
       expect(saveButton.showButton).not.toHaveBeenCalled();
       expect(saveButton.hideButton).toHaveBeenCalled();
+    });
+  });
+  /**
+   * Os casos acima dublam o SaveButtonComponent: provam que `showButton()` foi chamado,
+   * nao que o botao aparece. O relato de 11/09 no #10519 e exatamente esse buraco — a
+   * chamada acontece e o botao continua escondido. Aqui o componente real entra no lugar
+   * do spy, com o `setTimeout` de verdade do `showButton()`/`hideButton()`.
+   */
+  describe('regressao SD #10519 (11/09) — botao real, nao o spy', () => {
+
+    let botaoReal: SaveButtonComponent;
+
+    const esperarTimers = () => new Promise(resolve => setTimeout(resolve, 10));
+
+    beforeEach(() => {
+      botaoReal = new SaveButtonComponent({ observable: of(false) } as any);
+      component.saveButton = botaoReal;
+    });
+
+    it('exibe o botao Salvar de fato ao encontrar a pessoa pelo e-mail completo', async () => {
+      personSrv.GetByKey.and.returnValue(Promise.resolve({
+        data: { id: 42, name: 'Angelica', roles: ['citizen'] }
+      }));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await component.searchPerson();
+      await esperarTimers();
+
+      expect(component.hasActiveMemberAs()).toBeTrue();
+      expect(botaoReal.isShowingButton).toBeTrue();
+    });
+
+    it('exibe o botao Salvar ao ativar o papel no switch, que e o contorno do relato', async () => {
+      personSrv.GetByKey.and.returnValue(Promise.resolve({
+        data: { id: 42, name: 'Angelica', roles: ['citizen'] }
+      }));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+      await component.searchPerson();
+      await esperarTimers();
+
+      // o que o (ngModelChange) do p-inputSwitch dispara
+      component.ccbMember.memberAs[0].active = false;
+      component.showSaveButton();
+      await esperarTimers();
+      expect(botaoReal.isShowingButton).toBeFalse();
+
+      component.ccbMember.memberAs[0].active = true;
+      component.showSaveButton();
+      await esperarTimers();
+      expect(botaoReal.isShowingButton).toBeTrue();
+    });
+  });
+  /**
+   * O interceptor nunca rejeita: em erro ele devolve
+   * `{ success: false, data: <corpo do erro> }` (http-request.interceptor.ts:119).
+   * Quem olha so o `data` adota o corpo do erro como pessoa.
+   */
+  describe('falha da API na busca por e-mail', () => {
+
+    let botaoReal: SaveButtonComponent;
+
+    const esperarTimers = () => new Promise(resolve => setTimeout(resolve, 10));
+
+    const respostaDeErro = {
+      success: false,
+      data: { timestamp: '2026-09-11T18:00:00Z', status: 500, error: 'Internal Server Error' },
+      message: 'Internal Server Error'
+    };
+
+    beforeEach(() => {
+      botaoReal = new SaveButtonComponent({ observable: of(false) } as any);
+      component.saveButton = botaoReal;
+    });
+
+    it('nao adota o corpo do erro como se fosse a pessoa', async () => {
+      personSrv.GetByKey.and.returnValue(Promise.resolve(respostaDeErro));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await component.searchPerson();
+
+      expect(component.ccbMember.person).toBeNull();
+      expect(component.ccbMember.memberAs).toEqual([]);
+    });
+
+    it('avisa o usuario em vez de esconder o botao sem explicacao', async () => {
+      personSrv.GetByKey.and.returnValue(Promise.resolve(respostaDeErro));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await component.searchPerson();
+      await esperarTimers();
+
+      expect(component.invalidMailMessage).toBe('traduzido:messages.error.generic');
+      expect(botaoReal.isShowingButton).toBeFalse();
+    });
+
+    it('nao cai no cadastro novo quando a API falha, para nao duplicar pessoa', async () => {
+      // 204 cai no cadastro novo; erro de API, nao — nao da para afirmar que nao existe.
+      personSrv.GetByKey.and.returnValue(Promise.resolve(respostaDeErro));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await component.searchPerson();
+
+      expect(component.ccbMember.person).not.toEqual(
+        jasmine.objectContaining({ name: 'angelica.qiu' })
+      );
+    });
+
+    it('reavalia o botao mesmo se a busca lancar', async () => {
+      personSrv.GetByKey.and.returnValue(Promise.reject(new Error('falha de rede')));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await expectAsync(component.searchPerson()).toBeRejected();
+      await esperarTimers();
+
+      // o estado precisa ser consistente: sem pessoa, sem papel e sem botao travado
+      expect(component.ccbMember.memberAs).toEqual([]);
+      expect(botaoReal.isShowingButton).toBeFalse();
+    });
+
+    it('trata resposta nula sem quebrar a busca', async () => {
+      // 204 chega como body null; destruturar direto lancava TypeError.
+      personSrv.GetByKey.and.returnValue(Promise.resolve(null));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await expectAsync(component.searchPerson()).toBeResolved();
+      await esperarTimers();
+
+      expect(component.ccbMember.person.name).toBe('angelica.qiu');
+      expect(botaoReal.isShowingButton).toBeTrue();
     });
   });
 });

@@ -42,7 +42,12 @@ docker run --rm \
     set -e
     if ! command -v chromium >/dev/null 2>&1; then
       echo '>>> instalando chromium...'
-      apt-get update -qq >/dev/null 2>&1
+      # Bullseye foi arquivado: deb.debian.org devolve 404 nos pacotes e o Release de
+      # bullseye-security esta vencido, entao o apt-get sai com 100 e derruba o script
+      # no set -e. Os pacotes continuam em archive.debian.org; o Release vencido e
+      # esperado ali, por isso o update nao serve de porteiro e quem decide e o install.
+      printf 'deb http://archive.debian.org/debian bullseye main\ndeb http://archive.debian.org/debian-security bullseye-security main\n' > /etc/apt/sources.list
+      apt-get -o Acquire::Check-Valid-Until=false update -qq >/dev/null 2>&1 || true
       apt-get install -y -qq chromium >/dev/null 2>&1
     fi
     if [ ! -d node_modules/@angular ]; then
