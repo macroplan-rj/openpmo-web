@@ -348,14 +348,21 @@ export class ControlChangeBoardMemberComponent implements OnInit, OnDestroy {
     this.currentUserInfo = await this.authSrv.getInfoPerson();
   }
 
+  /**
+   * A visibilidade do botao e decidida uma vez so, no fim. Esconder antes da
+   * requisicao criava uma corrida: o `:leave` do botao dura 200ms e a resposta da API
+   * chega dentro dessa janela, entao o `:enter` disputava com a saida ainda rodando e
+   * as vezes perdia — o botao ficava escondido com o papel ligado, que e o relato do
+   * #10519. Medido em dev: a opacidade caia para 0.11 em t+700ms.
+   *
+   * O `showSaveButton()` do finally cobre os tres desfechos (encontrada, 204 e falha),
+   * entao nada se perde ao nao esconder antes, e qualquer saida — inclusive uma
+   * excecao — deixa a tela num estado coerente.
+   */
   async searchPerson() {
-    this.saveButton?.hideButton();
     try {
       this.ccbMember.person = await this.findPersonByEmail();
     } finally {
-      // O botao Salvar foi escondido antes da busca. Qualquer saida daqui — inclusive
-      // uma excecao — precisa reavalia-lo, senao a tela fica travada sem explicacao:
-      // e o que o usuario contorna desligando e religando o papel no switch.
       this.setFormPerson(this.ccbMember.person);
       this.setMemberAsCcbMember(this.ccbMember.person);
       this.showSaveButton();

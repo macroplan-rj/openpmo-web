@@ -279,4 +279,34 @@ describe('ControlChangeBoardMemberComponent — papéis do membro do CCM', () =>
       expect(botaoReal.isShowingButton).toBeTrue();
     });
   });
+  /**
+   * A corrida do #10519: o `:leave` do botao dura 200ms e a resposta da API cai dentro
+   * dessa janela. Esconder antes de buscar e mostrar depois punha as duas animacoes
+   * para disputar, e as vezes a saida ganhava — botao escondido com o papel ligado.
+   * A garantia duravel e nao piscar: uma busca decide a visibilidade uma vez so.
+   */
+  describe('visibilidade decidida uma vez por busca', () => {
+
+    it('nao esconde o botao antes de buscar quando a pessoa e encontrada', async () => {
+      personSrv.GetByKey.and.returnValue(Promise.resolve({
+        success: true,
+        data: { id: 42, name: 'Angelica', roles: ['citizen'] }
+      }));
+      component.searchedEmailPerson = 'angelica.qiu@macroplan.com.br';
+
+      await component.searchPerson();
+
+      expect(saveButton.hideButton).not.toHaveBeenCalled();
+      expect(saveButton.showButton).toHaveBeenCalledTimes(1);
+    });
+
+    it('esconde uma unica vez quando a busca nao deixa papel ativo', async () => {
+      component.searchedEmailPerson = '';
+
+      await component.searchPerson();
+
+      expect(saveButton.showButton).not.toHaveBeenCalled();
+      expect(saveButton.hideButton).toHaveBeenCalledTimes(1);
+    });
+  });
 });
