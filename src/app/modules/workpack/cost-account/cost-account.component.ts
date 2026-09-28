@@ -33,6 +33,7 @@ import {
 } from 'src/app/shared/services/pentaho.service';
 import { Dropdown } from 'primeng/dropdown';
 import { InputNumber } from 'primeng/inputnumber';
+import { uoDisplayText } from 'src/app/shared/utils/uo-label.util';
 
 @Component({
   selector: 'app-cost-account',
@@ -314,7 +315,7 @@ export class CostAccountComponent implements OnInit {
             code: uo.code,
             name: uo.name,
             fullName: uo.fullName,
-            displayText: `${uo.code} - ${uo.name} - ${uo.fullName}`,
+            displayText: uoDisplayText(uo),
           }))
         );
 
