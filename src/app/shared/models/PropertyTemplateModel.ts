@@ -23,8 +23,6 @@ export class PropertyTemplateModel implements IProperty {
   max?: number;
   precision?: number;
   possibleValues?: { label: string; value: string }[];
-  // Lista mestre, preservada enquanto possibleValues é filtrado em cascata (grupo do PPA).
-  allPossibleValues?: { label: string; value: string }[];
   possibleValuesIds?: { label: string; value: number }[];
   multipleSelection?: boolean;
   rows?: number;
@@ -47,6 +45,11 @@ export class PropertyTemplateModel implements IProperty {
   dirty = false;
   helpText?: string;
   typeWorkPack?: TypeWorkpackEnumWBS;
+  /** Selecao dinamica (SD #10548). */
+  providerKey?: string;
+  dependsOn?: string;
+  /** Rotulo de cada codigo escolhido, mantido pelo campo para gravar junto com o valor. */
+  valueLabels?: { [code: string]: string };
 
   getValues() {
     const {
@@ -81,6 +84,13 @@ export class PropertyTemplateModel implements IProperty {
       case TypePropertyModelEnum.UnitSelectionModel:
         property.selectedValue = selectedValue;
         break;
+      case TypePropertyModelEnum.DynamicSelectionModel: {
+        const codes = (Array.isArray(value) ? value as string[] : (value ? [value as string] : []))
+          .filter(code => code !== null && code !== undefined && `${code}` !== '');
+        property.value = codes.join(',');
+        property.label = codes.map(code => (this.valueLabels && this.valueLabels[code]) || code).join('; ');
+        break;
+      }
       case TypePropertyModelEnum.OrganizationSelectionModel:
         const selectedOrganization = !multipleSelection && selectedValues as number;
         property.selectedValues = selectedOrganization ? [selectedOrganization] : selectedValues as number[];

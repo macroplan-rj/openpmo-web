@@ -10,5 +10,6 @@ export enum TypePropertModelEnum {
   TextAreaModel = 'TextAreaModel',
   UnitSelectionModel = 'UnitSelectionModel',
   ToggleModel = 'ToggleModel',
+  DynamicSelectionModel = 'DynamicSelectionModel',
   GroupModel = 'GroupModel'
 };

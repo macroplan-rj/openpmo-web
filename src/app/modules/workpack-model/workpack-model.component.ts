@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { filter, takeUntil } from 'rxjs/operators';
 import { Subject, Subscription } from 'rxjs';
+import { DynamicSelectionService } from 'src/app/shared/services/dynamic-selection.service';
 import { ConfirmationService, MenuItem, MessageService, SelectItem, TreeNode } from 'primeng/api';
 
 import { IconPropertyWorkpackModelEnum as IconPropertyEnum } from 'src/app/shared/enums/IconPropertyWorkpackModelEnum';
@@ -111,6 +112,7 @@ export class WorkpackModelComponent implements OnInit {
   pageSize = 5;
   totalRecords: number;
   typePropertyEnum = TypePropertyEnum;
+  dynamicSelectionProviders: SelectItem[];
   propertiesOffice: IOffice;
   propertiesPlanModel: IPlanModel;
   reusableWorkpackModelsList: MenuItem[];
@@ -165,6 +167,7 @@ export class WorkpackModelComponent implements OnInit {
     private localitySrv: LocalityService,
     private messageSrv: MessageService,
     private workpackModelSrv: WorkpackModelService,
+    private dynamicSelectionSrv: DynamicSelectionService,
     private responsiveSrv: ResponsiveService,
     private confirmationSrv: ConfirmationService,
     private officePermissionSrv: OfficePermissionService,
@@ -960,6 +963,12 @@ export class WorkpackModelComponent implements OnInit {
       case TypePropertyEnum.SelectionModel:
         requiredFields = requiredFields.concat(['possibleValuesOptions', 'multipleSelection']);
         break;
+      case TypePropertyEnum.DynamicSelectionModel:
+        // SD #10548: as opcoes vem de um provedor; o pai e outra selecao dinamica do mesmo modelo.
+        requiredFields = requiredFields.concat(['providerKey', 'multipleSelection']);
+        list = await this.getListDynamicSelectionProviders();
+        this.refreshDependsOnOptions(property);
+        break;
       case TypePropertyEnum.GroupModel:
         requiredFields = ['name', 'sortIndex', 'groupedProperties'];
         break;
@@ -1019,6 +1028,8 @@ export class WorkpackModelComponent implements OnInit {
   }
 
   async propertyChanged(event) {
+    // Nome ou rotulo de uma selecao dinamica pode ter mudado: atualiza as opcoes de "Depende de".
+    this.refreshDependsOnOptions();
     if (event?.property && event.property?.idDomain && this.editPermission) {
       // Domain selection changed
 
@@ -1244,6 +1255,30 @@ get integrationSectorOptions(): SelectItem[] {
       }
     }
     return this.listMeasureUnits;
+  }
+
+  async getListDynamicSelectionProviders(): Promise<SelectItem[]> {
+    if (!this.dynamicSelectionProviders) {
+      const providers = await this.dynamicSelectionSrv.providers().toPromise();
+      this.dynamicSelectionProviders = (providers || []).map(p => ({ label: p.label, value: p.key }));
+    }
+    return this.dynamicSelectionProviders;
+  }
+
+  /** Opcoes de "Depende de": as outras selecoes dinamicas do modelo, em qualquer grupo, pelo nome. */
+  refreshDependsOnOptions(target?: IWorkpackModelProperty) {
+    const all: IWorkpackModelProperty[] = [];
+    (this.modelProperties || []).forEach(p => {
+      all.push(p);
+      (p.groupedProperties || []).forEach(gp => all.push(gp));
+    });
+    const dynamics = all.filter(p => p.type === TypePropertyEnum.DynamicSelectionModel);
+    const targets = target ? [target, ...dynamics] : dynamics;
+    targets.forEach(p => {
+      p.dependsOnOptions = dynamics
+        .filter(other => other !== p && other.name)
+        .map(other => ({ label: other.label || other.name, value: other.name }));
+    });
   }
 
   async getListLocalities(idDomain: number, multipleSelection: boolean) {
@@ -1636,6 +1671,7 @@ get integrationSectorOptions(): SelectItem[] {
       delete prop.obligatory;
       delete prop.defaultsDetails;
       delete prop.disableMultipleSelection;
+      delete prop.dependsOnOptions;
     });
     const propertiesGroupClone = [...this.modelProperties.filter(prop => prop.type === TypePropertyEnum.GroupModel)];
     propertiesGroupClone.forEach(propGroup => {
@@ -1661,6 +1697,7 @@ get integrationSectorOptions(): SelectItem[] {
         delete propGrouped.isCollapsed;
         delete propGrouped.viewOnly;
         delete propGrouped.obligatory;
+        delete propGrouped.dependsOnOptions;
       });
     });
     const { name: modelName, nameInPlural: modelNameInPlural, icon, sortedBy: sortBy, position } = this.formProperties.value;

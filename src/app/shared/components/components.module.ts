@@ -29,6 +29,7 @@ import { PropertyDateComponent } from './properties/type-property/property-date/
 import { PropertyIntegerComponent } from './properties/type-property/property-integer/property-integer.component';
 import { PropertyOrganizationSelectionComponent } from './properties/type-property/property-organization-selection/property-organization-selection.component';
 import { PropertySelectionComponent } from './properties/type-property/property-selection/property-selection.component';
+import { PropertyDynamicSelectionComponent } from './properties/type-property/property-dynamic-selection/property-dynamic-selection.component';
 import { PropertyTextComponent } from './properties/type-property/property-text/property-text.component';
 import { PropertyTextareaComponent } from './properties/type-property/property-textarea/property-textarea.component';
 import { PropertyToggleComponent } from './properties/type-property/property-toggle/property-toggle.component';
@@ -70,6 +71,7 @@ import { CardSharingIndicatorsComponent } from './card-sharing-indicators/card-s
     PropertyIntegerComponent,
     PropertyOrganizationSelectionComponent,
     PropertySelectionComponent,
+    PropertyDynamicSelectionComponent,
     PropertyTextComponent,
     PropertyTextareaComponent,
     PropertyToggleComponent,
