@@ -270,9 +270,21 @@ export class WorkpackCardItemComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** A justificativa é obrigatória quando o marco tem baseline ativa e a data mudou. */
+  /**
+   * A justificativa é obrigatória em todo salvamento pelo modal (SD #10593).
+   *
+   * Até a US-004 ela só era exigida com baseline ativa e data alterada — regra que o
+   * servidor continua aplicando (ChangeMilestoneData/REASON_NOT_PRESENT). O SIPGR pediu que
+   * nenhuma alteração feita pelo card saia sem justificativa, então o card exige sempre;
+   * a regra da baseline segue valendo na tela de detalhes, que não passa por aqui.
+   */
   get milestoneEditReasonRequired(): boolean {
-    return !!this.properties?.hasBaseline && this.milestoneEditDateChanged;
+    return true;
+  }
+
+  /** Justificativa vazia ou só com espaços. */
+  get milestoneEditReasonMissing(): boolean {
+    return !this.milestoneEditReason || !this.milestoneEditReason.trim();
   }
 
   /** Data no modal difere da que está no card, comparando só o dia. */
@@ -292,7 +304,7 @@ export class WorkpackCardItemComponent implements OnInit, OnDestroy {
    * Salva data, justificativa e conclusão pelo modal (US-004).
    *
    * São DOIS endpoints, porque não existe um que faça as duas coisas:
-   *   - data/justificativa -> PATCH /milestones/{id}
+   *   - data/justificativa -> PATCH /milestones/{id} (sempre que algo mudou — SD #10593)
    *   - conclusão          -> PATCH /workpacks/complete-deliverable/{id}, que apesar do
    *     nome trata Milestone (CompleteWorkpackService verifica `instanceof Milestone`).
    *
@@ -300,7 +312,15 @@ export class WorkpackCardItemComponent implements OnInit, OnDestroy {
    * endpoint novo — registrado na story como ponto para o PO, não resolvido aqui.
    */
   async saveMilestoneEdit() {
-    if (this.milestoneEditReasonRequired && !this.milestoneEditReason?.trim()) {
+    const dataMudou = this.milestoneEditDateChanged;
+    const conclusaoMudou = this.milestoneEditCompletedChanged;
+    if (!dataMudou && !conclusaoMudou) {
+      // Nada a justificar: Salvar sem alteração equivale a fechar.
+      this.closeMilestoneEditModal();
+      return;
+    }
+
+    if (this.milestoneEditReasonRequired && this.milestoneEditReasonMissing) {
       this.messageSrv.add({
         severity: 'warn',
         summary: this.translateSrv.instant('attention'),
@@ -309,25 +329,22 @@ export class WorkpackCardItemComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const dataMudou = this.milestoneEditDateChanged;
-    const conclusaoMudou = this.milestoneEditCompletedChanged;
-    if (!dataMudou && !conclusaoMudou) {
-      this.closeMilestoneEditModal();
-      return;
-    }
-
     const data = moment(this.milestoneEditDate).format('yyyy-MM-DD');
     this.workpackSrv.nextPendingChanges(false);
 
+    // SD #10593: o PATCH do marco vai sempre que algo mudou — inclusive quando só a conclusão
+    // mudou e a data segue igual — porque é ele que leva a justificativa ao diário. O
+    // complete-deliverable não recebe texto nenhum; sem esta chamada a justificativa que o
+    // usuário foi obrigado a escrever se perderia.
+    const { success } = await this.workpackSrv.patchMilestoneReason(this.properties.itemId, {
+      date: data,
+      reason: this.milestoneEditReason
+    });
+    if (!success) {
+      this.notifyMilestoneSaveFailed();
+      return;
+    }
     if (dataMudou) {
-      const { success } = await this.workpackSrv.patchMilestoneReason(this.properties.itemId, {
-        date: data,
-        reason: this.milestoneEditReason
-      });
-      if (!success) {
-        this.notifyMilestoneSaveFailed();
-        return;
-      }
       this.properties.subtitleCardItem = data;
       this.setMilestoneDateProperty();
     }

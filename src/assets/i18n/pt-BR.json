@@ -286,7 +286,7 @@
   "close": "Fechar",
   "describeJustification": "Descreva a justificativa",
   "milestoneDateHint": "Data prevista ou de realização do marco crítico",
-  "milestoneReasonHint": "Obrigatória quando o marco possui linha de base ativa",
+  "milestoneReasonHint": "Obrigatória: descreva o motivo da alteração de data ou da conclusão",
   "periodicity": "Periodicidade",
   "period": "Período",
   "periods": "Períodos",

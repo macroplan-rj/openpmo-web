@@ -34,8 +34,10 @@ describe('WorkpackCardItemComponent', () => {
   const langChange = new Subject<any>();
 
   let workpackSrvMock: any;
+  let messageSrvMock: any;
 
   beforeEach(() => {
+    messageSrvMock = { add: jasmine.createSpy('add') };
     workpackSrvMock = {
       nextPendingChanges: jasmine.createSpy('nextPendingChanges'),
       patchMilestoneReason: jasmine.createSpy('patchMilestoneReason')
@@ -80,7 +82,7 @@ describe('WorkpackCardItemComponent', () => {
           }
         },
         { provide: WorkpackService, useValue: workpackSrvMock },
-        { provide: MessageService, useValue: { add: () => {} } },
+        { provide: MessageService, useFactory: () => messageSrvMock },
         { provide: JournalService, useValue: { GetById: () => Promise.resolve({ success: true, data: {} }) } }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -397,6 +399,7 @@ describe('WorkpackCardItemComponent', () => {
     it('so a data mudou: chama apenas o endpoint de marco', async () => {
       abrir();
       component.milestoneEditDate = new Date(2026, 10, 20);
+      component.milestoneEditReason = 'reprogramacao acordada';
 
       await component.saveMilestoneEdit();
 
@@ -405,30 +408,80 @@ describe('WorkpackCardItemComponent', () => {
       expect(component.properties.subtitleCardItem).toBe('2026-11-20');
     });
 
-    it('so a conclusao mudou: chama apenas complete-deliverable', async () => {
+    it('so a conclusao mudou: grava a justificativa com a data atual e depois conclui (SD #10593)', async () => {
       abrir();
       component.milestoneEditDate = new Date(2020, 0, 15);
       component.properties.subtitleCardItem = '2020-01-15';
       component.setMilestoneDateProperty();
       component.milestoneEditDate = component.milestoneDate;
       component.milestoneEditCompleted = true;
+      component.milestoneEditReason = 'entregue na reuniao de 15/01';
 
       await component.saveMilestoneEdit();
 
-      expect(workpackSrvMock.patchMilestoneReason).not.toHaveBeenCalled();
+      expect(workpackSrvMock.patchMilestoneReason).toHaveBeenCalledTimes(1);
+      expect(workpackSrvMock.patchMilestoneReason).toHaveBeenCalledWith(42, {
+        date: '2020-01-15',
+        reason: 'entregue na reuniao de 15/01'
+      });
       expect(workpackSrvMock.completeDeliverable).toHaveBeenCalledTimes(1);
       expect(component.properties.completed).toBeTrue();
+      expect(component.properties.subtitleCardItem).toBe('2020-01-15');
     });
 
-    it('com baseline ativa, data nova sem justificativa nao salva', async () => {
-      abrir({ hasBaseline: true });
+    it('so a conclusao mudou e a justificativa falhou: nao conclui', async () => {
+      workpackSrvMock.patchMilestoneReason.and.returnValue(Promise.resolve({ success: false }));
+      abrir();
+      component.milestoneEditDate = new Date(2020, 0, 15);
+      component.properties.subtitleCardItem = '2020-01-15';
+      component.setMilestoneDateProperty();
+      component.milestoneEditDate = component.milestoneDate;
+      component.milestoneEditCompleted = true;
+      component.milestoneEditReason = 'texto';
+
+      await component.saveMilestoneEdit();
+
+      expect(workpackSrvMock.completeDeliverable).not.toHaveBeenCalled();
+      expect(component.showMilestoneEditModal).toBeTrue();
+    });
+
+    it('data nova sem justificativa nao salva e avisa (SD #10593)', async () => {
+      abrir({ hasBaseline: false });
       component.milestoneEditDate = new Date(2026, 10, 20);
       component.milestoneEditReason = '   ';
 
       await component.saveMilestoneEdit();
 
       expect(workpackSrvMock.patchMilestoneReason).not.toHaveBeenCalled();
+      expect(workpackSrvMock.completeDeliverable).not.toHaveBeenCalled();
       expect(component.showMilestoneEditModal).toBeTrue();
+      expect(messageSrvMock.add).toHaveBeenCalledWith(jasmine.objectContaining({ severity: 'warn' }));
+    });
+
+    it('conclusao sem justificativa nao salva (SD #10593)', async () => {
+      abrir();
+      component.milestoneEditDate = new Date(2020, 0, 15);
+      component.properties.subtitleCardItem = '2020-01-15';
+      component.setMilestoneDateProperty();
+      component.milestoneEditDate = component.milestoneDate;
+      component.milestoneEditCompleted = true;
+      component.milestoneEditReason = '';
+
+      await component.saveMilestoneEdit();
+
+      expect(workpackSrvMock.patchMilestoneReason).not.toHaveBeenCalled();
+      expect(workpackSrvMock.completeDeliverable).not.toHaveBeenCalled();
+      expect(component.showMilestoneEditModal).toBeTrue();
+    });
+
+    it('a justificativa e sempre obrigatoria, com ou sem baseline (SD #10593)', () => {
+      abrir({ hasBaseline: false });
+      expect(component.milestoneEditReasonRequired).toBeTrue();
+      expect(component.milestoneEditReasonMissing).toBeTrue();
+      component.milestoneEditReason = '  ';
+      expect(component.milestoneEditReasonMissing).toBeTrue();
+      component.milestoneEditReason = 'ok';
+      expect(component.milestoneEditReasonMissing).toBeFalse();
     });
 
     it('com baseline ativa e justificativa preenchida, salva', async () => {
@@ -442,13 +495,15 @@ describe('WorkpackCardItemComponent', () => {
       expect(component.showMilestoneEditModal).toBeFalse();
     });
 
-    it('sem baseline a justificativa nao e exigida', async () => {
+    it('sem baseline, com justificativa, salva (SD #10593)', async () => {
       abrir({ hasBaseline: false });
       component.milestoneEditDate = new Date(2026, 10, 20);
+      component.milestoneEditReason = 'ajuste de cronograma';
 
       await component.saveMilestoneEdit();
 
       expect(workpackSrvMock.patchMilestoneReason).toHaveBeenCalledTimes(1);
+      expect(component.showMilestoneEditModal).toBeFalse();
     });
 
     it('falha ao gravar a data nao tenta concluir', async () => {
@@ -456,6 +511,7 @@ describe('WorkpackCardItemComponent', () => {
       abrir();
       component.milestoneEditDate = new Date(2026, 10, 20);
       component.milestoneEditCompleted = true;
+      component.milestoneEditReason = 'texto';
 
       await component.saveMilestoneEdit();
 
@@ -470,6 +526,7 @@ describe('WorkpackCardItemComponent', () => {
       component.setMilestoneDateProperty();
       component.milestoneEditDate = component.milestoneDate;
       component.milestoneEditCompleted = true;
+      component.milestoneEditReason = 'concluido';
 
       await component.saveMilestoneEdit();
 
