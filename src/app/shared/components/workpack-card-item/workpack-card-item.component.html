@@ -657,12 +657,12 @@
 
         <div class="field field-reason">
           <label class="field-label" for="milestoneEditReason">
-            {{'justification'|translate}}<span *ngIf="milestoneEditReasonRequired"> *</span>
+            {{'justification'|translate}} *
             <i class="fas fa-info-circle" [pTooltip]="'milestoneReasonHint'|translate"></i>
           </label>
           <textarea pInputTextarea id="milestoneEditReason" rows="4"
             [(ngModel)]="milestoneEditReason"
-            [class.required-missing]="milestoneEditReasonRequired && !milestoneEditReason?.trim()"
+            [class.required-missing]="milestoneEditReasonMissing"
             [placeholder]="'describeJustification'|translate"></textarea>
         </div>
       </div>

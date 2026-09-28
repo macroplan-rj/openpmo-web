@@ -281,7 +281,7 @@
   "close": "Close",
   "describeJustification": "Describe the justification",
   "milestoneDateHint": "Planned or actual date of the critical milestone",
-  "milestoneReasonHint": "Required when the milestone has an active baseline",
+  "milestoneReasonHint": "Required: describe why the date or the completion changed",
   "period": "Period",
   "periods": "Periods",
   "expectedGoal": "Expected Goal",
