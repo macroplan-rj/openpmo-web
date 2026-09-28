@@ -63,6 +63,25 @@
           <i class="far fa-question-circle" [pTooltip]="'help.propertyModel.possibleValues' | translate"></i>
         </label>
       </span>
+      <ng-container *ngIf="property.type === 'DynamicSelectionModel'">
+        <span class="p-float-label property-selection p-field">
+          <p-dropdown class="app-single-selection" [options]="property.list" [(ngModel)]="property.providerKey"
+            [required]="true" [autoDisplayFirst]="false" dropdownIcon="fas fa-caret-down" [filter]="true"
+            (ngModelChange)="changed.emit($event)" [disabled]="property.viewOnly || !!property.id"></p-dropdown>
+          <label class="input-label">{{ 'dynamicSelectionProvider' | translate }} *
+            <i class="far fa-question-circle" [pTooltip]="'dynamicSelectionHelpProvider' | translate"></i>
+          </label>
+        </span>
+        <span class="p-float-label property-selection p-field">
+          <p-dropdown class="app-single-selection" [options]="property.dependsOnOptions" [(ngModel)]="property.dependsOn"
+            [showClear]="true" [autoDisplayFirst]="false" dropdownIcon="fas fa-caret-down"
+            [placeholder]="'dynamicSelectionNoParent' | translate"
+            (ngModelChange)="changed.emit($event)" [disabled]="property.viewOnly"></p-dropdown>
+          <label class="input-label">{{ 'dynamicSelectionDependsOn' | translate }}
+            <i class="far fa-question-circle" [pTooltip]="'dynamicSelectionHelpDependsOn' | translate"></i>
+          </label>
+        </span>
+      </ng-container>
       <span class="p-float-label property-selection p-field" *ngIf="property.type === 'LocalitySelectionModel'">
         <ng-container *ngIf="false; else singleDomainSelection">
           <p-multiSelect class="app-multiple-selection" dropdownIcon="fas fa-caret-down" [options]="property.list"
@@ -234,7 +253,7 @@
         </label>
       </span>
       <span class="property-checkbox p-field-checkbox"
-        *ngIf="[ 'SelectionModel', 'LocalitySelectionModel', 'OrganizationSelectionModel' ].includes(property.type)">
+        *ngIf="[ 'SelectionModel', 'LocalitySelectionModel', 'OrganizationSelectionModel', 'DynamicSelectionModel' ].includes(property.type)">
         <p-checkbox class="app-checkbox" [(ngModel)]="property.multipleSelection" [binary]="true"
           [disabled]="property.viewOnly || property.disableMultipleSelection" [required]="true"
           (ngModelChange)="changed.emit({property: property, multipleSelectedChanged: true}); checkDefaultValue();">

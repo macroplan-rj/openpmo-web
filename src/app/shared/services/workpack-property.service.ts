@@ -126,7 +126,6 @@ export class WorkpackPropertyService {
     property.max = pro.max;
     property.precision = pro.precision;
     property.possibleValues = pro.possibleValues;
-    property.allPossibleValues = pro.allPossibleValues;
     property.possibleValuesIds = pro.possibleValuesIds;
     property.multipleSelection = pro.multipleSelection;
     property.rows = pro.rows;
@@ -148,6 +147,9 @@ export class WorkpackPropertyService {
     property.collapsed = pro.collapsed;
     property.dirty = pro.dirty;
     property.helpText = pro.helpText;
+    property.providerKey = pro.providerKey;
+    property.dependsOn = pro.dependsOn;
+    property.valueLabels = pro.valueLabels;
     return property;
   }
 
@@ -233,6 +235,20 @@ export class WorkpackPropertyService {
       const listValues = propertyWorkpack?.value ? propertyWorkpack?.value as string : propertyModel.defaultValue as string;
       property.defaultValue = listValues.length > 0 ? listValues.split(',') : null;
       property.value = listValues.length > 0 ? listValues.split(',') : null;
+    }
+
+    if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.DynamicSelectionModel) {
+      // Selecao dinamica (SD #10548): value guarda CODIGOS; o rotulo gravado junto vira o mapa
+      // codigo -> rotulo, para o campo exibir o que esta salvo antes de consultar o provedor.
+      property.providerKey = propertyModel.providerKey;
+      property.dependsOn = propertyModel.dependsOn;
+      const raw = (propertyWorkpack?.value ?? propertyModel.defaultValue ?? '') as string;
+      const codes = `${raw}`.split(',').map(c => c.trim()).filter(c => c);
+      const labels = `${propertyWorkpack?.label ?? ''}`.split('; ');
+      property.valueLabels = {};
+      codes.forEach((code, i) => property.valueLabels[code] = labels[i] || code);
+      property.value = propertyModel.multipleSelection ? codes : (codes[0] ?? null);
+      property.defaultValue = property.value as any;
     }
 
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel) {

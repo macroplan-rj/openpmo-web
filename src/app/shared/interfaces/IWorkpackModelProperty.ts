@@ -37,4 +37,8 @@ export interface IWorkpackModelProperty {
   showIconButtonSelectLocality?: boolean; //only screen
   helpText?: string;
   disableMultipleSelection?: boolean;
+  /** Selecao dinamica (SD #10548): chave do provedor de opcoes e nome da propriedade-pai. */
+  providerKey?: string;
+  dependsOn?: string;
+  dependsOnOptions?: SelectItem[]; //only screen
 }

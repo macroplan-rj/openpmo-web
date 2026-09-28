@@ -9,5 +9,7 @@ export interface IWorkpackProperty {
   selectedValuesDetails?: {id: number; name: string; fullName: string}[];
   selectedValue?: number;
   reason?: string;
+  /** Selecao dinamica: rotulo(s) do(s) codigo(s) em value, gravado(s) junto. */
+  label?: string;
   groupedProperties?: IWorkpackProperty[];
 }
