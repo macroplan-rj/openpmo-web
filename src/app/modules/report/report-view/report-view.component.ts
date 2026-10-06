@@ -27,6 +27,7 @@ import { ReportPreferredFormatEnum } from 'src/app/shared/enums/ReportPreferredF
 import { IReportGenerate } from 'src/app/shared/interfaces/IReportGenerate';
 import { MenuService } from 'src/app/shared/services/menu.service';
 import { IMenuWorkpack } from 'src/app/shared/interfaces/IMenu';
+import { splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 @Component({
   selector: 'app-report-view',
@@ -246,13 +247,14 @@ export class ReportViewComponent implements OnInit, OnDestroy {
     }
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel && propertyModel.multipleSelection) {
       const listValues = propertyModel.defaultValue as string;
-      property.defaultValue = listValues.length > 0 ? listValues.split(',') : null;
-      property.value = listValues.length > 0 ? listValues.split(',') : null;
+      const selectedValues = splitSelectionValues(listValues);
+      property.defaultValue = selectedValues.length > 0 ? selectedValues : null;
+      property.value = selectedValues.length > 0 ? [...selectedValues] : null;
     }
 
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel) {
       const listOptions = propertyModel.possibleValues ?
-        (propertyModel.possibleValues as string).split(',').sort((a, b) => a.localeCompare(b)) : [];
+        splitSelectionValues(propertyModel.possibleValues as string).sort((a, b) => a.localeCompare(b)) : [];
       property.possibleValues = listOptions.map(op => ({ label: op, value: op }));
     }
 

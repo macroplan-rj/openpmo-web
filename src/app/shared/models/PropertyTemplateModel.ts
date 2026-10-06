@@ -5,6 +5,7 @@ import { IProperty } from '../interfaces/IProperty';
 import { IWorkpackProperty } from '../interfaces/IWorkpackProperty';
 import { IMilestonePropertyData } from '../interfaces/IMilestonePropertyData';
 import { TypeWorkpackEnumWBS } from '../enums/TypeWorkpackEnum';
+import { joinSelectionValues } from '../utils/selection-values';
 
 export class PropertyTemplateModel implements IProperty {
   id?: number;
@@ -78,7 +79,7 @@ export class PropertyTemplateModel implements IProperty {
         break;
       case TypePropertyModelEnum.SelectionModel:
         const selectedOptions = multipleSelection && value as string[];
-        const stringValue = !!selectedOptions ? selectedOptions.join(',') : value as string;
+        const stringValue = !!selectedOptions ? joinSelectionValues(selectedOptions) : value as string;
         property.value = stringValue;
         break;
       case TypePropertyModelEnum.UnitSelectionModel:

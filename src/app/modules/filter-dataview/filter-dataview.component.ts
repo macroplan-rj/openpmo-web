@@ -33,6 +33,7 @@ import { TypeWorkpackModelEnum } from 'src/app/shared/enums/TypeWorkpackModelEnu
 import { TypePropertyModelEnum } from 'src/app/shared/enums/TypePropertyModelEnum';
 import { CostAccountService } from 'src/app/shared/services/cost-account.service';
 import { CancelButtonComponent } from 'src/app/shared/components/cancel-button/cancel-button.component';
+import { joinSelectionValues, splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 @Component({
   selector: 'app-filter-dataview',
@@ -428,7 +429,7 @@ export class FilterDataviewComponent implements OnInit, OnDestroy {
         break;
       case TypePropertyModelEnum.SelectionModel:
         const selectedOptions = property.multipleSelection && propValue as string[];
-        const stringValue = selectedOptions ? selectedOptions.join(',') : propValue as string;
+        const stringValue = selectedOptions ? joinSelectionValues(selectedOptions) : propValue as string;
         value = stringValue;
         break;
       case TypePropertyModelEnum.UnitSelectionModel:
@@ -475,7 +476,7 @@ export class FilterDataviewComponent implements OnInit, OnDestroy {
         break;
       case TypePropertyModelEnum.SelectionModel:
         const selectedOptions = property.multipleSelection && propertyValue as string;
-        const stringValue = selectedOptions ? selectedOptions.split(',') : propertyValue as string;
+        const stringValue = selectedOptions ? splitSelectionValues(selectedOptions) : propertyValue as string;
         value = stringValue;
         break;
       case TypePropertyModelEnum.UnitSelectionModel:
@@ -594,11 +595,11 @@ export class FilterDataviewComponent implements OnInit, OnDestroy {
 
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel && propertyModel.multipleSelection) {
       const listValues = propertyModel.defaultValue as string;
-      property.defaultValue = listValues.split(',');
+      property.defaultValue = splitSelectionValues(listValues);
     }
 
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel) {
-      const listOptions = (propertyModel.possibleValues as string).split(',').sort((a, b) => a.localeCompare(b));
+      const listOptions = splitSelectionValues(propertyModel.possibleValues as string).sort((a, b) => a.localeCompare(b));
       property.possibleValues = listOptions.map(op => ({ label: op, value: op }));
     }
 

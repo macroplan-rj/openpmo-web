@@ -49,8 +49,9 @@
         </label>
       </span>
       <span class="p-float-label property-input app-input-chips p-field" *ngIf="property.type === 'SelectionModel'">
-        <p-chips inputStyleClass="app-input-text" [(ngModel)]="property.possibleValuesOptions" [required]="true"
-          [allowDuplicate]="false" (ngModelChange)="changed.emit($event)" [disabled]="property.viewOnly" separator=","
+        <p-chips #possibleValuesChips inputStyleClass="app-input-text" [(ngModel)]="property.possibleValuesOptions" [required]="true"
+          [allowDuplicate]="false" (ngModelChange)="handlePossibleValuesChange($event)" [disabled]="property.viewOnly" separator=";"
+          (keydown)="handlePossibleValuesKeydown($event, possibleValuesChips)"
           (onRemove)="checkIfRemovedValueIsDefault($event)"
           [class.p-inputwrapper-filled]="property.possibleValuesOptions && property.possibleValuesOptions.length > 0">
           <ng-template let-item pTemplate="item">

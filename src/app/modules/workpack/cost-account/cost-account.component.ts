@@ -34,6 +34,7 @@ import {
 import { Dropdown } from 'primeng/dropdown';
 import { InputNumber } from 'primeng/inputnumber';
 import { uoDisplayText } from 'src/app/shared/utils/uo-label.util';
+import { splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 @Component({
   selector: 'app-cost-account',
@@ -672,9 +673,9 @@ export class CostAccountComponent implements OnInit {
       const listValues = propertyCostAccount?.value
         ? (propertyCostAccount?.value as string)
         : (propertyModel.defaultValue as string);
-      property.defaultValue =
-        listValues.length > 0 ? listValues.split(',') : null;
-      property.value = listValues.length > 0 ? listValues.split(',') : null;
+      const selectedValues = splitSelectionValues(listValues);
+      property.defaultValue = selectedValues.length > 0 ? selectedValues : null;
+      property.value = selectedValues.length > 0 ? [...selectedValues] : null;
     }
 
     if (
@@ -682,8 +683,7 @@ export class CostAccountComponent implements OnInit {
       TypePropertyModelEnum.SelectionModel
     ) {
       const listOptions = propertyModel.possibleValues
-        ? (propertyModel.possibleValues as string)
-            .split(',')
+        ? splitSelectionValues(propertyModel.possibleValues as string)
             .sort((a, b) => a.localeCompare(b))
         : [];
       property.possibleValues = listOptions.map((op) => ({

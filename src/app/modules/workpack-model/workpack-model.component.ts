@@ -44,6 +44,7 @@ import { TypeOrganization } from 'src/app/shared/enums/TypeOrganization';
 import { IOrganization } from 'src/app/shared/interfaces/IOrganization';
 import { CancelButtonComponent } from 'src/app/shared/components/cancel-button/cancel-button.component';
 import { IPluginAvailability, PluginAvailabilityService } from 'src/app/shared/services/plugin-availability.service';
+import { joinSelectionValues, selectionArraySeparator, splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 interface IIcon {
   name: string;
@@ -756,10 +757,10 @@ export class WorkpackModelComponent implements OnInit {
         const dataPropertiesAndIndex = (await Promise.all(data.properties.filter(property => property.session !== 'COST')
           .map(async (p, i) => {
             if (p.possibleValues) {
-              p.possibleValuesOptions = (p.possibleValues as string).split(',');
+              p.possibleValuesOptions = splitSelectionValues(p.possibleValues as string);
             }
             if (p.defaultValue && p.multipleSelection) {
-              p.defaultValue = (p.defaultValue as string).split(',');
+              p.defaultValue = splitSelectionValues(p.defaultValue as string);
             }
             if (p.idDomain) {
               p.extraList = await this.getListLocalities(p.idDomain, p.multipleSelection);
@@ -799,10 +800,10 @@ export class WorkpackModelComponent implements OnInit {
               p.menuModelProperties = this.loadMenuPropertyGroup(p);
               p.groupedProperties.forEach(async (gp) => {
                 if (gp.possibleValues) {
-                  gp.possibleValuesOptions = (gp.possibleValues as string).split(',');
+                  gp.possibleValuesOptions = splitSelectionValues(gp.possibleValues as string);
                 }
                 if (gp.defaultValue && gp.multipleSelection) {
-                  gp.defaultValue = (gp.defaultValue as string).split(',');
+                  gp.defaultValue = splitSelectionValues(gp.defaultValue as string);
                 }
                 if (gp.sectors) {
                   gp.sectorsList = gp.sectors.split(',').map(sector => sector.toUpperCase());
@@ -1650,14 +1651,14 @@ get integrationSectorOptions(): SelectItem[] {
     this.modelProperties.forEach(prop => {
       delete prop.extraList;
       delete prop.extraListDefaults;
-      prop.possibleValues = prop.possibleValuesOptions && prop.possibleValuesOptions.join(',');
+      prop.possibleValues = prop.possibleValuesOptions && joinSelectionValues(prop.possibleValuesOptions);
     });
     const propertiesClone: IWorkpackModelProperty[] =
       JSON.parse(JSON.stringify([...this.modelProperties.filter(prop => prop.type !== TypePropertyEnum.GroupModel)]));
     propertiesClone.map(prop => {
       Object.keys(prop).map(key => {
         if (prop[key] && prop[key] instanceof Array && key !== 'defaults') {
-          prop[key] = prop[key].map(v => typeof v == 'string' ? v.trim() : v).join(',') as string;
+          prop[key] = prop[key].map(v => typeof v == 'string' ? v.trim() : v).join(selectionArraySeparator(prop, key)) as string;
         }
         if (prop[key] && !(prop[key] instanceof Array) && key === 'defaults' && prop.type !== 'UnitSelectionModel') {
           prop[key] = [prop[key]] as number[];
@@ -1678,14 +1679,14 @@ get integrationSectorOptions(): SelectItem[] {
       propGroup.groupedProperties.forEach(p => {
         delete p.extraList;
         delete p.extraListDefaults;
-        p.possibleValues = p.possibleValuesOptions && p.possibleValuesOptions.join(',');
+        p.possibleValues = p.possibleValuesOptions && joinSelectionValues(p.possibleValuesOptions);
       });
       propGroup.label = propGroup.name;
       propGroup.groupedProperties = JSON.parse(JSON.stringify([...propGroup.groupedProperties]));
       propGroup.groupedProperties.map(propGrouped => {
         Object.keys(propGrouped).map(key => {
           if (propGrouped[key] && propGrouped[key] instanceof Array && key !== 'defaults') {
-            propGrouped[key] = propGrouped[key].map(v => typeof v == 'string' ? v.trim() : v).join(',') as string;
+            propGrouped[key] = propGrouped[key].map(v => typeof v == 'string' ? v.trim() : v).join(selectionArraySeparator(propGrouped, key)) as string;
           }
           if (propGrouped[key] && !(propGrouped[key] instanceof Array) && key === 'defaults' && propGrouped.type !== 'UnitSelectionModel') {
             propGrouped[key] = [propGrouped[key]] as number[];
@@ -1949,10 +1950,10 @@ get integrationSectorOptions(): SelectItem[] {
     return (await Promise.all(properties
       .map(async (p, i) => {
         if (p.possibleValues) {
-          p.possibleValuesOptions = (p.possibleValues as string).split(',');
+          p.possibleValuesOptions = splitSelectionValues(p.possibleValues as string);
         }
         if (p.defaultValue && p.multipleSelection) {
-          p.defaultValue = (p.defaultValue as string).split(',');
+          p.defaultValue = splitSelectionValues(p.defaultValue as string);
         }
         if (p.idDomain) {
           p.extraList = await this.getListLocalities(p.idDomain, p.multipleSelection);

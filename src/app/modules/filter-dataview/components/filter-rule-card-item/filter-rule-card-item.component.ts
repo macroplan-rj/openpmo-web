@@ -12,6 +12,7 @@ import { ICardItemFilterRules } from './../../../../shared/interfaces/ICardItemF
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { PropertyTemplateModel } from 'src/app/shared/models/PropertyTemplateModel';
 import * as moment from 'moment';
+import { splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 @Component({
   selector: 'app-filter-rule-card-item',
@@ -142,7 +143,7 @@ export class FilterRuleCardItemComponent implements OnInit {
     }
     if (this.typePropertyModel[this.propertySelected.type] === TypePropertyModelEnum.SelectionModel && this.propertySelected.multipleSelection) {
       const listValues = this.propertySelected.defaultValue as string;
-      this.filterRuleCard.value = listValues.split(',');
+      this.filterRuleCard.value = splitSelectionValues(listValues);
     }
     if (this.propertySelected.localitiesSelected ) {
       this.filterRuleCard.value = this.propertySelected.multipleSelection ? this.propertySelected.localitiesSelected as TreeNode[]
