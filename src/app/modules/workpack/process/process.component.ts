@@ -74,11 +74,8 @@ export class ProcessComponent implements OnInit, OnDestroy {
       actingSector: ['', Validators.required],
       lastDispatchDate: ['', Validators.required]
     });
-    this.formProcess.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formProcess.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formProcess.dirty && this.formProcess.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formProcess.dirty))
       .subscribe(() => this.saveButton.showButton());
     this.formProcess.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formProcess.dirty))

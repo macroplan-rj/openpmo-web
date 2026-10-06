@@ -168,7 +168,7 @@
   </div>
 
   <app-buttons-container *ngIf="!planLoading">
-    <app-save-button (save)="savePlan()"></app-save-button>
+    <app-save-button [form]="formPlan" (save)="savePlan()"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
 

@@ -117,7 +117,7 @@
     <span>{{idReport}}</span>
   </div>
   <app-buttons-container>
-    <app-save-button (save)="handleOnSubmit()" *ngIf="isUserAdmin"></app-save-button>
+    <app-save-button [form]="formReport" (save)="handleOnSubmit()" *ngIf="isUserAdmin"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
 

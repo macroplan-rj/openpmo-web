@@ -78,11 +78,8 @@ export class IssueComponent implements OnInit {
       nature: [this.issuePropertiesOptions.nature.PROBLEM.value, Validators.required],
       status: [this.issuePropertiesOptions.status.OPEN.value, Validators.required],
     });
-    this.formIssue.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formIssue.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formIssue.dirty && this.formIssue.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formIssue.dirty))
       .subscribe(() => this.saveButton.showButton());
     this.formIssue.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formIssue.dirty))

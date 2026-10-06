@@ -83,22 +83,15 @@ export class DomainComponent implements OnInit, OnDestroy {
       longitude: null,
       type: TypeLocality.Root.toLocaleUpperCase(),
     });
-    this.formDomain.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
-    this.formLocalityRoot.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
+    // SD-10606: obrigatorios pendentes nao escondem o Salvar; handleOnSubmit avisa e nao envia
     this.formDomain.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formDomain.dirty && this.formDomain.valid &&
-        (!this.propertiesDomain || !this.propertiesDomain.localityRoot ? this.formLocalityRoot.valid : true)))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formDomain.dirty))
       .subscribe(() => { this.saveButton.showButton(); });
     this.formDomain.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formDomain.dirty))
       .subscribe(() => { this.cancelButton.showButton() });
     this.formLocalityRoot.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formDomain.valid && this.formLocalityRoot.dirty
-        && this.formLocalityRoot.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formLocalityRoot.dirty))
       .subscribe(() => this.saveButton.showButton());
     this.formLocalityRoot.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formLocalityRoot.dirty))
@@ -225,6 +218,10 @@ export class DomainComponent implements OnInit, OnDestroy {
   }
 
   async handleOnSubmit() {
+    const needsLocalityRoot = !this.propertiesDomain || !this.propertiesDomain.localityRoot;
+    if (this.saveButton?.blockIfInvalid(this.formDomain, needsLocalityRoot ? this.formLocalityRoot : null)) {
+      return;
+    }
     this.cancelButton.hideButton();
     this.formIsSaving = true;
     const { success, data } = this.propertiesDomain

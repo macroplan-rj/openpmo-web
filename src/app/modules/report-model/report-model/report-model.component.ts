@@ -147,14 +147,11 @@ export class ReportModelComponent implements OnInit, OnDestroy {
       fullName: '',
       preferredOutputFormat: 'PDF'
     });
-    this.formReport.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formReport.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formReport.dirty && this.formReport.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formReport.dirty))
       .subscribe(() => { this.saveButton.showButton();});
     this.formReport.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formReport.dirty && this.formReport.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formReport.dirty))
       .subscribe(() => { this.cancelButton.showButton();});
     this.translateSrv.onLangChange
       .pipe(takeUntil(this.$destroy)).subscribe(({ lang }) => {
@@ -461,53 +458,38 @@ export class ReportModelComponent implements OnInit, OnDestroy {
     this.cardParameters.isLoading = false;
   }
 
+  /**
+   * SD-10606: o Salvar nao some mais por pendencia nos parametros; as mesmas regras sao
+   * avaliadas em propertiesValidationError() e avisadas no clique (handleOnSubmit).
+   */
   checkProperties() {
+    this.saveButton?.showButton();
+  }
+
+  /** Retorna a chave i18n do primeiro problema que impede salvar os parametros, ou null. */
+  propertiesValidationError(): string {
     const properties: IWorkpackModelProperty[] = [...this.modelProperties];
     const hasInvalidMax = properties.some(p =>
       [TypePropertyEnum.IntegerModel, TypePropertyEnum.TextModel, TypePropertyEnum.TextAreaModel]
         .includes(p.type as TypePropertyEnum) &&
       (p.max === null || p.max === undefined || p.max <= 0)
     );
-
-    if (hasInvalidMax) {
-      this.saveButton?.hideButton();
-      return;
-    }
     // Value check
-    const propertiesChecks: { valid: boolean; invalidKeys: string[]; prop: IWorkpackModelProperty }[] = properties.map(p => ({
-      valid: p.requiredFields
-        .map(r => (p[r] instanceof Array
-          ? p[r].length > 0
-          : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r]))
-        .reduce((acc, v) => acc ? v : acc, true),
-      invalidKeys: p.requiredFields
-        .filter(r => !(p[r] instanceof Array
-          ? p[r].length > 0
-          : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r])),
-      prop: p
-    }));
-    const arePropertiesValid = propertiesChecks.reduce((a, b) => a ? b.valid : a, true);
-    if (!arePropertiesValid) {
-      this.saveButton?.hideButton();
-      return;
+    const arePropertiesValid = properties.every(p => p.requiredFields
+      .every(r => (p[r] instanceof Array
+        ? p[r].length > 0
+        : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r])));
+    if (hasInvalidMax || !arePropertiesValid) {
+      return 'messages.requiredInformationsMustBeFilled';
     }
     const separationForDuplicateCheck = properties.map(prop => [prop.name, prop.label])
       .reduce((a, b) => ((a[0].push(b[0])), a[1].push(b[1]), a), [[], []]);
-    // Duplicated name check
-    if (new Set(separationForDuplicateCheck[0]).size !== properties.length) {
-      this.saveButton?.hideButton();
-      return;
+    // Duplicated name / label check
+    if (new Set(separationForDuplicateCheck[0]).size !== properties.length
+      || new Set(separationForDuplicateCheck[1]).size !== properties.length) {
+      return 'messages.invalidForm';
     }
-    // Duplicated label check
-    if (new Set(separationForDuplicateCheck[1]).size !== properties.length) {
-      this.saveButton?.hideButton();
-      return;
-    }
-    const showButton = true;
-    if (showButton) {
-      this.saveButton?.showButton();
-      return;
-    }
+    return null;
   }
 
   async checkProperty(property: IWorkpackModelProperty) {
@@ -740,7 +722,8 @@ export class ReportModelComponent implements OnInit, OnDestroy {
     newProperty.isCollapsed = false;
     await this.checkProperty(newProperty);
     this.cancelButton.showButton();
-    this.saveButton?.hideButton();
+    // SD-10606: parametro novo (ainda sem nome/rotulo) nao esconde o Salvar; o clique avisa
+    this.saveButton?.showButton();
     return this.modelProperties.push(newProperty);
   }
 
@@ -755,10 +738,7 @@ export class ReportModelComponent implements OnInit, OnDestroy {
         compiled: false
       });
     });
-    if (this.formReport.valid) {
-      this.saveButton.showButton();
-      this.checkProperties();
-    }
+    this.saveButton.showButton();
     this.cancelButton.showButton();
     this.loadCardItemsFiles();
   }
@@ -768,6 +748,17 @@ export class ReportModelComponent implements OnInit, OnDestroy {
   }
 
   async handleOnSubmit() {
+    const validationError = this.propertiesValidationError();
+    if (validationError) {
+      this.saveButton?.rejectSave(false);
+      this.messageSrv.add({
+        severity: 'warn',
+        summary: this.translateSrv.instant('attention'),
+        detail: this.translateSrv.instant(validationError),
+        life: 3000
+      });
+      return;
+    }
     this.cancelButton.hideButton();
     this.formIsSaving = true;
     if (this.files && this.files.length > 0) {

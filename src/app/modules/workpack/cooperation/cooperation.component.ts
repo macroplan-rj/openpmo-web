@@ -114,14 +114,6 @@ export class CooperationComponent implements OnInit, OnDestroy {
       numOriginal: [''],
     });
 
-    this.formCooperation.statusChanges
-      .pipe(
-        takeUntil(this.$destroy),
-        filter((status) => status === 'INVALID')
-      )
-      .subscribe(() => {
-        this.saveButton?.hideButton();
-      });
 
     this.formCooperation.valueChanges
       .pipe(
@@ -129,11 +121,8 @@ export class CooperationComponent implements OnInit, OnDestroy {
         filter(() => this.formCooperation.dirty)
       )
       .subscribe(() => {
-        if (
-          !this.idCooperation &&
-          this.formCooperation.valid &&
-          this.formCooperation.controls.process.value
-        ) {
+        // SD-10606: obrigatorios pendentes nao escondem o Salvar (o clique avisa)
+        if (!this.idCooperation) {
           this.saveButton?.showButton();
         } else {
           this.saveButton?.hideButton();
@@ -531,6 +520,7 @@ export class CooperationComponent implements OnInit, OnDestroy {
       !this.formCooperation.controls.process.value
     ) {
       this.formCooperation.markAllAsTouched();
+      this.saveButton?.rejectSave();
       return;
     }
 

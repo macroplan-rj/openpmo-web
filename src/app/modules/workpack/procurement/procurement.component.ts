@@ -129,8 +129,9 @@ export class ProcurementComponent implements OnInit, OnDestroy {
 
   async handleProcessChange(event): Promise<void> {
     this.clearDetails();
+    // SD-10606: limpar o processo nao esconde o Salvar; o clique avisa que ele e obrigatorio
     if (!event.value) {
-      this.saveButton?.hideButton();
+      this.formProcurement.controls.process.markAsTouched();
       return;
     }
     const result = await this.procurementsSrv.getProviderProcess(event.value);
@@ -186,7 +187,11 @@ export class ProcurementComponent implements OnInit, OnDestroy {
 
   async saveProcurement(): Promise<void> {
     const selected = this.processOptions.find(option => option.value === this.formProcurement.controls.process.value);
-    if (!selected) return;
+    if (!selected) {
+      this.formProcurement.markAllAsTouched();
+      this.saveButton?.rejectSave();
+      return;
+    }
     this.formIsSaving = true;
     const sender: IProcurementCreate = {
       idWorkpack: this.idWorkpack,

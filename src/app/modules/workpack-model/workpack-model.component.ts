@@ -309,11 +309,8 @@ export class WorkpackModelComponent implements OnInit {
         });
       }
     }
-    this.formProperties.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formProperties.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formProperties.dirty && this.formProperties.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formProperties.dirty))
       .subscribe(() => this.checkProperties());
   }
 
@@ -923,7 +920,8 @@ export class WorkpackModelComponent implements OnInit {
     };
     newProperty.isCollapsed = false;
     await this.checkProperty(newProperty);
-    this.saveButton?.hideButton();
+    // SD-10606: propriedade nova (ainda sem nome/rotulo) nao esconde o Salvar; o clique avisa
+    this.saveButton?.showButton();
     if (type === TypePropertyEnum.GroupModel) {
       newProperty.groupedProperties = [];
       newProperty.menuModelProperties = this.loadMenuPropertyGroup(newProperty);
@@ -1071,43 +1069,14 @@ export class WorkpackModelComponent implements OnInit {
     this.checkProperties();
   }
 
+  /**
+   * SD-10606: o Salvar nao some mais quando o modelo tem pendencias. As regras continuam as
+   * mesmas, mas sao avaliadas por propertiesValidationError() e avisadas no clique (handleSubmit).
+   */
   checkProperties(changeStakeholderRoles = false) {
     this.cancelButton.showButton();
-    if (this.formProperties.invalid) {
-      this.saveButton?.hideButton();
-      return;
-    }
-    const properties: IWorkpackModelProperty[] = [...this.modelProperties];
-    const hasInvalidMax = properties.some(p =>
-      [TypePropertyEnum.IntegerModel, TypePropertyEnum.TextModel, TypePropertyEnum.TextAreaModel]
-        .includes(p.type as TypePropertyEnum) &&
-      (p.max === null || p.max === undefined || p.max <= 0)
-    );
-    if (hasInvalidMax) {
-      this.saveButton?.hideButton();
-      return;
-    }
-    // Value check
-    const propertiesChecks: { valid: boolean; invalidKeys: string[]; prop: IWorkpackModelProperty }[] = properties.map(p => ({
-      valid: p.requiredFields
-        .map(r => (p[r] instanceof Array
-          ? p[r].length > 0
-          : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r]))
-        .reduce((acc, v) => acc ? v : acc, true),
-      invalidKeys: p.requiredFields
-        .filter(r => !(p[r] instanceof Array
-          ? p[r].length > 0
-          : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r])),
-      prop: p
-    }));
-    const arePropertiesValid = propertiesChecks.reduce((a, b) => a ? b.valid : a, true);
-    // Stakeholder
-    const arePossiblesValuesValid = (this.posibleRolesOrg.length > 0 || this.posibleRolesPerson.length > 0)
-      || !this.cardPropertiesStakeholders.initialStateToggle
-      || this.workpackModelType === TypeWorkpackModelEnum.MilestoneModel;
-
-    if (this.formProperties.invalid || !arePropertiesValid || !arePossiblesValuesValid) {
-      this.saveButton?.hideButton();
+    this.saveButton?.showButton();
+    if (this.propertiesValidationError()) {
       return;
     }
     if (this.dashboardPanel && !!changeStakeholderRoles) {
@@ -1130,31 +1099,45 @@ export class WorkpackModelComponent implements OnInit {
           this.notificationsStakeholderRolesOptions.find(opt => opt.value === role)
         );
     }
+  }
+
+  /** Retorna a chave i18n do primeiro problema que impede salvar o modelo, ou null. */
+  propertiesValidationError(): string {
+    const required = 'messages.requiredInformationsMustBeFilled';
+    if (this.formProperties.invalid) {
+      return required;
+    }
+    const properties: IWorkpackModelProperty[] = [...this.modelProperties];
+    const hasInvalidMax = properties.some(p =>
+      [TypePropertyEnum.IntegerModel, TypePropertyEnum.TextModel, TypePropertyEnum.TextAreaModel]
+        .includes(p.type as TypePropertyEnum) &&
+      (p.max === null || p.max === undefined || p.max <= 0)
+    );
+    if (hasInvalidMax) {
+      return required;
+    }
+    // Value check
+    const arePropertiesValid = properties.every(p => p.requiredFields
+      .every(r => (p[r] instanceof Array
+        ? p[r].length > 0
+        : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r])));
+    // Stakeholder
+    const arePossiblesValuesValid = (this.posibleRolesOrg.length > 0 || this.posibleRolesPerson.length > 0)
+      || !this.cardPropertiesStakeholders.initialStateToggle
+      || this.workpackModelType === TypeWorkpackModelEnum.MilestoneModel;
+    if (!arePropertiesValid || !arePossiblesValuesValid) {
+      return required;
+    }
     const separationForDuplicateCheck = properties.map(prop => [prop.name, prop.label])
       .reduce((a, b) => ((a[0].push(b[0])), a[1].push(b[1]), a), [[], []]);
-    // Duplicated name check
-    if (new Set(separationForDuplicateCheck[0]).size !== properties.length) {
-      this.saveButton?.hideButton();
-      return;
+    // Duplicated name / label check
+    if (new Set(separationForDuplicateCheck[0]).size !== properties.length
+      || new Set(separationForDuplicateCheck[1]).size !== properties.length) {
+      return 'messages.invalidForm';
     }
-    // Duplicated label check
-    if (new Set(separationForDuplicateCheck[1]).size !== properties.length) {
-      this.saveButton?.hideButton();
-      return;
-    }
-    let showButton = true;
-    properties.filter(prop => prop.type === TypePropertyEnum.GroupModel).forEach(propGroup => {
-      const showSaveButton = this.checkPropertiesGroupeds(propGroup.groupedProperties);
-      if (!showSaveButton) {
-        this.saveButton?.hideButton();
-        showButton = false;
-        return;
-      }
-    });
-    if (showButton) {
-      this.saveButton?.showButton();
-      return;
-    }
+    const groupsValid = properties.filter(prop => prop.type === TypePropertyEnum.GroupModel)
+      .every(propGroup => this.checkPropertiesGroupeds(propGroup.groupedProperties));
+    return groupsValid ? null : required;
   }
 
   checkPropertiesGroupeds(groupedProperties?: IWorkpackModelProperty[]) {
@@ -1646,6 +1629,18 @@ get integrationSectorOptions(): SelectItem[] {
   }
 
   async handleSubmit() {
+    const validationError = this.propertiesValidationError();
+    if (validationError) {
+      this.formProperties.markAllAsTouched();
+      this.saveButton?.rejectSave(false);
+      this.messageSrv.add({
+        severity: 'warn',
+        summary: this.translateSrv.instant('attention'),
+        detail: this.translateSrv.instant(validationError),
+        life: 3000
+      });
+      return;
+    }
     this.cancelButton.hideButton();
     this.formIsSaving = true;
     this.modelProperties.forEach(prop => {

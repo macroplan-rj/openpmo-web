@@ -10,9 +10,6 @@
         [class.not-fullLine]="!property.fullLine && property.type !== 'TextArea' && property.type !== 'Group' && property.name !== 'name'"
         [class.fullLine]="property.fullLine || property.type === 'TextArea' || property.type === 'Group' || property.name === 'name'">
         <app-property [property]="property" (changed)="checkProperties(property)"></app-property>
-        <span class="input-message-error" *ngIf="property.invalid && property.type !== 'Group'">
-          {{ property.message }}
-        </span>
       </div>
     </div>
   </app-card>

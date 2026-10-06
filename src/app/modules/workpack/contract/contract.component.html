@@ -154,6 +154,7 @@
                 {{ 'contract' | translate }} *
               </label>
             </span>
+            <app-input-message [form]="formContract" field="process"></app-input-message>
           </div>
 
           <div
@@ -219,7 +220,7 @@
   </div>
   
   <app-buttons-container *ngIf="!isLoading && !idContract">
-    <app-save-button
+    <app-save-button [form]="formContract"
       #saveButton
       (save)="saveContract()"
     >

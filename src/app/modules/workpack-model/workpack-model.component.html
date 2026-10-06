@@ -28,6 +28,7 @@
             <label class="app-input-label" for="input-name">{{ 'modelName' | translate }} *
               <i class="far fa-question-circle" [pTooltip]="'help.workpackModel.modelName' | translate"></i>
             </label>
+            <app-input-message [form]="formProperties" field="name"></app-input-message>
           </span>
           <span class="p-float-label property-input p-field" [class.desktop-width]="!isMobileView">
             <input class="app-input-text" id="input-name-plural" type="text" pInputText formControlName="nameInPlural"
@@ -35,6 +36,7 @@
             <label class="app-input-label" for="input-name-plural">{{ 'modelNameInPlural' | translate }} *
               <i class="far fa-question-circle" [pTooltip]="'help.workpackModel.modelNameInPlural' | translate"></i>
             </label>
+            <app-input-message [form]="formProperties" field="nameInPlural"></app-input-message>
           </span>
           <span class="p-float-label property-input p-field">
             <p-inputNumber class="app-input-number" id="input-position" formControlName="position" [min]="1" [step]="1"
@@ -42,6 +44,7 @@
             <label class="app-input-label" for="input-position">{{ 'position' | translate }} *
               <i class="far fa-question-circle" [pTooltip]="'help.workpackModel.position' | translate"></i>
             </label>
+            <app-input-message [form]="formProperties" field="position"></app-input-message>
           </span>
           <span class="p-float-label property-input p-field">
             <p-dropdown class="app-single-selection" inputId="input-icon" [options]="icons" formControlName="icon"
@@ -62,6 +65,7 @@
             <label class="app-input-label" for="input-icon">{{ 'icon' | translate }} *
               <i class="far fa-question-circle" [pTooltip]="'help.workpackModel.icon' | translate"></i>
             </label>
+            <app-input-message [form]="formProperties" field="icon"></app-input-message>
           </span>
           <span class="p-float-label property-input p-field">
             <p-dropdown class="app-single-selection" inputId="input-sort-by" (onClick)="getSortedByList()"

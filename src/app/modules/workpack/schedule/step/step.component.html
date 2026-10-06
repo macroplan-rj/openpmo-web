@@ -51,10 +51,11 @@
                       (onInput)="handleChangeTotalsValues()" [minFractionDigits]="unitPrecision"
                       [maxFractionDigits]="unitPrecision" [locale]="currentLang === 'pt-BR' ? 'pt-BR' : 'en-US'">
                     </p-inputNumber>
-                  <label class="app-input-label">{{unitName}} {{ isCurrentBaseline ? ("reprogrammed" | translate) : ("planned" | translate) }} * 
+                  <label class="app-input-label">{{unitName}} {{ isCurrentBaseline ? ("reprogrammed" | translate) : ("planned" | translate) }}<span class="required-indicator">*</span>
                       <i class="far fa-question-circle" [pTooltip]="'help.step.estimatedPhysical' | translate"></i>
                     </label>
                   </span>
+                  <app-input-message [form]="formStep" field="plannedWork"></app-input-message>
                 </div>
                 <div class="p-field" [class.responsive]="responsive">
                   <span class="p-float-label" [class.responsive]="responsive">
@@ -133,7 +134,7 @@
     <span>{{idStep}}</span>
   </div>
   <app-buttons-container>
-    <app-save-button (save)="saveStep()"></app-save-button>
+    <app-save-button [form]="formStep" (save)="saveStep()"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
   

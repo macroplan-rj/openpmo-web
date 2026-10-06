@@ -122,11 +122,8 @@ export class OfficeComponent implements OnDestroy {
       name: ['', [Validators.required, Validators.maxLength(25)]],
       fullName: ['', [Validators.required]]
     });
-    this.formOffice.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formOffice.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formOffice.dirty && this.formOffice.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formOffice.dirty))
       .subscribe(() => {
         this.saveButton.showButton();
       });

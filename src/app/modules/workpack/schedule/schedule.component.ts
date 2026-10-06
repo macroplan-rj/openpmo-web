@@ -279,7 +279,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   handleChangeValuesCardItems() {
     this.reloadCostAssignmentTotals();
-    if (!this.actualValidationMessage && this.formSchedule.valid) {
+    // SD-10606: obrigatorio vazio nao esconde o Salvar (o clique avisa); so a regra do realizado esconde
+    if (!this.actualValidationMessage) {
       if (this.costAssignmentsCardItems && this.costAssignmentsCardItems.length > 0
         && this.costAssignmentsCardItems.filter(item => item.type !== 'new-cost-card').length === this.costAssignmentsCardItems.length - 1) {
         const startDate = moment(this.formSchedule.controls.start.value);
@@ -311,7 +312,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     } else {
       this.actualValidationMessage = null;
     }
-    if (!this.actualValidationMessage && this.formSchedule.valid) {
+    if (!this.actualValidationMessage) {
       if (this.costAssignmentsCardItems && this.costAssignmentsCardItems.length > 0
         && this.costAssignmentsCardItems.filter(item => item.plannedWork >= 0).length > 0) {
         const startDate = moment(this.formSchedule.controls.start.value);
@@ -348,7 +349,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.actualValidationMessage = null;
     }
 
-    if (!this.actualValidationMessage && this.formSchedule.valid) {
+    if (!this.actualValidationMessage) {
       if (this.costAssignmentsCardItems && this.costAssignmentsCardItems.length > 0 &&
         this.costAssignmentsCardItems.filter(item => item.plannedWork >= 0).length > 0) {
         const startDate = moment(this.formSchedule.controls.start.value);

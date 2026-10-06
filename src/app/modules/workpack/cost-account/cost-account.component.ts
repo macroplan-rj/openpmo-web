@@ -35,6 +35,7 @@ import { Dropdown } from 'primeng/dropdown';
 import { InputNumber } from 'primeng/inputnumber';
 import { uoDisplayText } from 'src/app/shared/utils/uo-label.util';
 import { splitSelectionValues } from 'src/app/shared/utils/selection-values';
+import { checkRequiredProperties, checkRequiredProperty, hasInvalidProperty } from 'src/app/shared/utils/required-properties';
 
 @Component({
   selector: 'app-cost-account',
@@ -1007,51 +1008,15 @@ export class CostAccountComponent implements OnInit {
             ...this.cardCostAccountProperties,
           };
     }
-    const arePropertiesRequiredValid: boolean =
-      this.sectionCostAccountProperties
-        .filter(({ required }) => required)
-        .map((prop) => {
-          let valid =
-            prop.value instanceof Array
-              ? prop.value.length > 0
-              : typeof prop.value == 'boolean' ||
-                typeof prop.value == 'number' ||
-                !!prop.value ||
-                (prop.value !== null && prop.value !== undefined);
-          if (
-            [
-              'OrganizationSelection',
-              'UnitSelection',
-              'LocalitySelection',
-            ].includes(prop.type)
-          ) {
-            if (prop.type === 'LocalitySelection') {
-              if (!prop.multipleSelection) {
-                const selectedLocality = prop.localitiesSelected as TreeNode;
-                prop.selectedValues = [selectedLocality.data];
-              }
-              if (prop.multipleSelection) {
-                const selectedLocality = prop.localitiesSelected as TreeNode[];
-                prop.selectedValues = selectedLocality
-                  .filter((locality) => locality.data !== prop.idDomain)
-                  .map((l) => l.data);
-              }
-            }
-            valid =
-              typeof prop.selectedValue === 'number' ||
-              (prop.selectedValues instanceof Array
-                ? prop.selectedValues.length > 0
-                : typeof prop.selectedValues == 'number');
-          }
-          if (property.idPropertyModel === prop.idPropertyModel) {
-            prop.invalid = !valid;
-            prop.message = valid ? '' : this.translateSrv.instant('required');
-          }
-          return valid;
-        })
-        .reduce((a, b) => (a ? b : a), true);
+    // SD-10606: recalcula so o obrigatorio alterado (a mensagem some ao preencher); o Salvar
+    // continua visivel e saveCostAccount cobra todas as pendencias de uma vez.
+    const requiredMessage = this.translateSrv.instant('requiredFill');
+    checkRequiredProperty(property, requiredMessage, property.type === TypePropertyModelEnum.GroupModel);
+    if (property.name === 'name') {
+      checkRequiredProperty(this.sectionCostAccountProperties.find((p) => p.name === 'fullName'), requiredMessage);
+    }
 
-    const arePropertiesStringValid: boolean = this.sectionCostAccountProperties
+    this.sectionCostAccountProperties
       .filter(({ min, max, value }) => (min || max) && typeof value == 'string')
       .map((prop) => {
         let valid = true;
@@ -1080,26 +1045,29 @@ export class CostAccountComponent implements OnInit {
                 ? (prop.message = this.translateSrv.instant('maxLength', {
                     max: prop.max,
                   }))
-                : (prop.message = this.translateSrv.instant('required'))
+                : (prop.message = this.translateSrv.instant('requiredFill'))
               : '';
           }
         }
         return valid;
       })
       .reduce((a, b) => (a ? b : a), true);
-    return arePropertiesRequiredValid && arePropertiesStringValid
-      ? this.saveButton?.showButton()
-      : this.saveButton?.hideButton();
+    this.saveButton?.showButton();
   }
 
   async saveCostAccount() {
+    const requiredOk = checkRequiredProperties(
+      this.sectionCostAccountProperties,
+      this.translateSrv.instant('requiredFill')
+    );
+    if (!requiredOk || hasInvalidProperty(this.sectionCostAccountProperties)) {
+      this.saveButton?.rejectSave();
+      return;
+    }
     this.cancelButton.hideButton();
     this.costAccountProperties = this.sectionCostAccountProperties.map((p) =>
       p.getValues()
     );
-    if (this.sectionCostAccountProperties.filter((p) => p.invalid).length > 0) {
-      return;
-    }
 
     this.formIsSaving = true;
     if (this.idCostAccount) {

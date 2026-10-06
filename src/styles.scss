@@ -627,6 +627,17 @@ div[class^='card-properties'] app-card .p-panel {
   }
 }
 
+// SD-10606: mensagem de validacao sob o campo ('Preenchimento obrigatorio' etc.), igual em
+// formularios reativos (app-input-message) e propriedades dinamicas (app-property).
+.input-message-error {
+  display: inline-flex;
+  color: #f44336;
+  background: transparent;
+  padding: 2px 8px 4px 0;
+  font-size: 0.7rem;
+  font-family: v.$fontFamilyMedium;
+}
+
 // componente input inline desabled
 .app-input-text-inline.p-inputtext {
   font-family: v.$fontFamilyMedium;

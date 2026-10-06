@@ -26,7 +26,7 @@
               <app-input-message [form]="formRiskResponse" field="name"></app-input-message>
             </div>
             <div class="p-field when-container">
-              <label class="when-label">{{'when' |translate}}
+              <label class="when-label">{{'when' |translate}} *
                 <i class="far fa-question-circle" [pTooltip]="'help.riskResponse.when' | translate"></i>
               </label>
               <div class="when-radios-container">
@@ -36,6 +36,7 @@
                 <p-radioButton class="when-radio pos" value="POST_OCCURRENCE" formControlName="when"
                   [label]="'postOccurrency' |translate"></p-radioButton>
               </div>
+              <app-input-message [form]="formRiskResponse" field="when"></app-input-message>
             </div>
           </div>
           <div class="form-group" *ngIf="formRiskResponse.controls.when.value === 'PRE_OCCURRENCE'">
@@ -129,6 +130,6 @@
   </div>
 </div>
 <app-buttons-container>
-  <app-save-button #saveButton (save)="saveRiskResponse()"></app-save-button>
+  <app-save-button [form]="formRiskResponse" #saveButton (save)="saveRiskResponse()"></app-save-button>
   <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
 </app-buttons-container>

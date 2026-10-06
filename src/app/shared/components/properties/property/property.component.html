@@ -13,3 +13,7 @@
   <app-property-dynamic-selection *ngSwitchCase="types.DynamicSelectionModel" [property]="property" (changed)="changed.emit($event)"></app-property-dynamic-selection>
   <app-property-group *ngSwitchCase="types.GroupModel" [groupProperty]="property" (changed)="changed.emit($event)"></app-property-group>
 </div>
+<!-- SD-10606: mensagem unica de validacao para todos os tipos (no grupo, cada filho mostra a sua) -->
+<span class="input-message-error" *ngIf="property.invalid && property.type !== types.GroupModel">
+  {{ property.message }}
+</span>

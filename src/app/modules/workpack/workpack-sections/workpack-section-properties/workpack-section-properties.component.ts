@@ -10,12 +10,13 @@ import { PropertyTemplateModel } from '../../../../shared/models/PropertyTemplat
 import { Subject } from 'rxjs';
 import { WorkpackService } from 'src/app/shared/services/workpack.service';
 import { Component, OnInit, Output, Input, EventEmitter, OnDestroy } from '@angular/core';
-import { MessageService, SelectItem, TreeNode } from 'primeng/api';
+import { MessageService, SelectItem } from 'primeng/api';
 import { ConfigDataViewService } from 'src/app/shared/services/config-dataview.service';
 import { WorkpackShowTabviewService } from 'src/app/shared/services/workpack-show-tabview.service';
 import { TypeWorkpackEnum, TypeWorkpackEnumWBS } from 'src/app/shared/enums/TypeWorkpackEnum';
 import * as moment from 'moment';
 import { TypeWorkpackModelEnum } from 'src/app/shared/enums/TypeWorkpackModelEnum';
+import { checkRequiredProperties, checkRequiredProperty, hasInvalidProperty } from 'src/app/shared/utils/required-properties';
 
 @Component({
   selector: 'app-workpack-section-properties',
@@ -68,8 +69,13 @@ export class WorkpackSectionPropertiesComponent implements OnInit, OnDestroy {
     };
     this.saveButtonSrv.observableSaveButtonClicked.pipe(takeUntil(this.$destroy)).subscribe(clicked => {
       if (clicked) {
+        // SD-10606: no Salvar, todas as obrigatorias vazias (inclusive em grupos) ficam marcadas;
+        // a ficha (saveWorkpack) recusa o envio enquanto houver propriedade invalida.
+        checkRequiredProperties(this.sectionPropertiesProperties, this.translateSrv.instant('requiredFill'));
         this.onGetProperties.next({ properties: this.sectionPropertiesProperties });
-        this.propertySrv.saveChangesProperties();
+        if (!hasInvalidProperty(this.sectionPropertiesProperties)) {
+          this.propertySrv.saveChangesProperties();
+        }
       }
     });
     this.saveButtonSrv.observableCancelButtonClicked.pipe(takeUntil(this.$destroy)).subscribe(clicked => {
@@ -222,66 +228,33 @@ export class WorkpackSectionPropertiesComponent implements OnInit, OnDestroy {
     this.saveButtonSrv.nextShowCancelButton(true);
   }
 
+  /**
+   * SD-10606: recalcula so a propriedade alterada (a mensagem some ao preencher) e mantem o
+   * Salvar visivel; as pendencias sao cobradas no clique (todas de uma vez).
+   */
   checkProperties(property: PropertyTemplateModel) {
     this.saveButtonSrv.nextShowCancelButton(true);
-    let arePropertiesRequiredValid: boolean = this.checkPropertiesRequiredValid(property);
-    let arePropertiesStringValid: boolean = this.checkPropertiesStringValid(property);
-    const arePropertiesReasonValid: boolean = !property?.needReason || (property?.needReason && !!property?.reason?.trim());
-    const arePropertiesNumberValid: boolean = this.checkPropertiesNumberValid(property);
+    this.checkPropertiesRequiredValid(property);
+    this.checkPropertiesStringValid(property);
+    this.checkPropertiesNumberValid(property);
     if (property.name == 'name') {
       const fullName = this.sectionPropertiesProperties.find((p) => (p.name === 'fullName'));
       if (fullName) {
         this.mirrorToFullName(property, fullName);
-        arePropertiesRequiredValid = this.checkPropertiesRequiredValid(fullName);
-        arePropertiesStringValid = this.checkPropertiesStringValid(fullName);
+        this.checkPropertiesRequiredValid(fullName);
+        this.checkPropertiesStringValid(fullName);
       }
     }
     if (property.name == 'fullName') {
       property.dirty = true;
     }
-
-    return (arePropertiesRequiredValid && arePropertiesStringValid && arePropertiesNumberValid && arePropertiesReasonValid) ?
-      this.saveButtonSrv.nextShowSaveButton(true) : this.saveButtonSrv.nextShowSaveButton(false);
+    this.saveButtonSrv.nextShowSaveButton(true);
   }
 
-  checkPropertiesRequiredValid(property: PropertyTemplateModel, groupedProperties?: PropertyTemplateModel[]) {
-    const properties = !groupedProperties ? this.sectionPropertiesProperties : groupedProperties;
-    const validated = properties
-      .filter(propReq => !!propReq.required || (propReq.type === 'Group' && propReq.groupedProperties
-        .filter(gp => !!gp.required).length > 0))
-      .map((prop) => {
-        let valid = (prop.value instanceof Array
-          ? (prop.value.length > 0)
-          : typeof prop.value == 'boolean' || typeof prop.value == 'number'
-          || !!prop.value || (prop.value !== null && prop.value !== undefined && prop.value !== ''));
-        if (['OrganizationSelection', 'UnitSelection', 'LocalitySelection'].includes(prop.type)) {
-          if (prop.type === 'LocalitySelection') {
-            if (!prop.multipleSelection) {
-              const selectedLocality = prop.localitiesSelected as TreeNode;
-              prop.selectedValues = selectedLocality ? [selectedLocality.data] : [];
-            }
-            if (prop.multipleSelection) {
-              const selectedLocality =
-                prop.localitiesSelected && prop.localitiesSelected !== null ? prop.localitiesSelected as TreeNode[] : [];
-              prop.selectedValues = selectedLocality.filter(locality => locality.data !== prop.idDomain)
-                .map(l => l.data);
-            }
-          }
-          valid = (typeof prop.selectedValue === 'number' || (prop.selectedValues instanceof Array ?
-            prop.selectedValues.length > 0 : typeof prop.selectedValues == 'number'));
-        }
-        const groupedPropertiesValid = prop.type === 'Group' ? this.checkPropertiesRequiredValid(property, prop.groupedProperties) : true;
-        if (prop.type === 'Group') {
-          valid = groupedPropertiesValid;
-        }
-        if (property.idPropertyModel === prop.idPropertyModel) {
-          prop.invalid = !valid;
-          prop.message = valid ? '' : this.translateSrv.instant('required');
-        }
-        return valid;
-      })
-      .reduce((a, b) => a ? b : a, true);
-    return validated;
+  /** Recalcula o obrigatorio da propriedade alterada (num grupo, so limpa os filhos ja preenchidos). */
+  checkPropertiesRequiredValid(property: PropertyTemplateModel) {
+    const isGroup = property.type === TypePropertyModelEnum.GroupModel;
+    return checkRequiredProperty(property, this.translateSrv.instant('requiredFill'), isGroup);
   }
 
   checkPropertiesStringValid(property: PropertyTemplateModel, groupedProperties?: PropertyTemplateModel[]) {
@@ -304,7 +277,7 @@ export class WorkpackSectionPropertiesComponent implements OnInit, OnDestroy {
             prop.message = !valid
             ? (String(prop.value).length > 0
                 ? `${this.translateSrv.instant('maxLength', { max: prop.max })}`
-                : this.translateSrv.instant('required'))
+                : this.translateSrv.instant('requiredFill'))
             : '';
           }
         }
@@ -335,7 +308,7 @@ export class WorkpackSectionPropertiesComponent implements OnInit, OnDestroy {
           if (property.idPropertyModel === prop.idPropertyModel) {
             prop.invalid = !valid;
             prop.message = !valid ? (Number(prop.value) > 0 ? prop.message = this.translateSrv.instant('maxValue')
-              : prop.message = this.translateSrv.instant('required')) : '';
+              : prop.message = this.translateSrv.instant('requiredFill')) : '';
           }
         }
         const groupedPropertiesValid = prop.type === 'Group' ? this.checkPropertiesStringValid(property, prop.groupedProperties) : true;

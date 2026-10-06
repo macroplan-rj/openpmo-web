@@ -1,6 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 
+/**
+ * Mensagem de validacao sob um campo de formulario reativo. Aparece quando o controle esta
+ * invalido e tocado (o Salvar marca todos como tocados, SD-10606) e some quando ele fica valido.
+ */
 @Component({
   selector: 'app-input-message',
   templateUrl: './input-message.component.html',
@@ -11,6 +16,7 @@ export class InputMessageComponent {
   @Input() form: FormGroup;
   @Input() field: string;
 
+  constructor(private translateSrv: TranslateService) { }
 
   isInvalid() {
     try {
@@ -22,16 +28,17 @@ export class InputMessageComponent {
   }
 
   message() {
-    let message = 'Informação inválida';
-
-    if (this.form.get(this.field)?.errors?.email) {
-      message = 'Informe um email válido';
-    } else if (this.form.get(this.field)?.errors?.required) {
-      message = 'Campo obrigatório';
-    } else if (this.form.get(this.field)?.errors?.maxlength) {
-      message = `Tamanho máximo: ${this.form.get(this.field).errors.maxlength.requiredLength} caracteres`;
+    const errors = this.form?.get(this.field)?.errors;
+    if (errors?.email) {
+      return this.translateSrv.instant('messages.invalidEmail');
     }
-
-    return message;
+    if (errors?.required || errors?.minLengthTextInvalid) {
+      return this.translateSrv.instant('requiredFill');
+    }
+    if (errors?.maxlength) {
+      return this.translateSrv.instant('maxLength', { max: errors.maxlength.requiredLength });
+    }
+    return this.translateSrv.instant('messages.invalidField');
   }
+
 }

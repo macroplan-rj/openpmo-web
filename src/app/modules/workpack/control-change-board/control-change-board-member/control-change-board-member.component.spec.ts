@@ -163,7 +163,7 @@ describe('ControlChangeBoardMemberComponent — papéis do membro do CCM', () =>
     const esperarTimers = () => new Promise(resolve => setTimeout(resolve, 10));
 
     beforeEach(() => {
-      botaoReal = new SaveButtonComponent({ observable: of(false) } as any);
+      botaoReal = new SaveButtonComponent({ observable: of(false) } as any, { add: () => {} } as any, { instant: (k: string) => k } as any);
       component.saveButton = botaoReal;
     });
 
@@ -218,7 +218,7 @@ describe('ControlChangeBoardMemberComponent — papéis do membro do CCM', () =>
     };
 
     beforeEach(() => {
-      botaoReal = new SaveButtonComponent({ observable: of(false) } as any);
+      botaoReal = new SaveButtonComponent({ observable: of(false) } as any, { add: () => {} } as any, { instant: (k: string) => k } as any);
       component.saveButton = botaoReal;
     });
 

@@ -119,7 +119,8 @@ export class ObligationComponent implements OnInit, OnDestroy {
 
   async handleProcessChange(event): Promise<void> {
     this.clearDetails();
-    if (!event.value) { this.saveButton?.hideButton(); return; }
+    // SD-10606: limpar a nota nao esconde o Salvar; o clique avisa que ela e obrigatoria
+    if (!event.value) { this.formObligation.controls.process.markAsTouched(); return; }
     const unitCode = this.formObligation.controls.managementUnit.value;
     const result = await this.obligationsSrv.getProviderProcess(event.value, unitCode);
     const selected = this.processOptions.find(option => option.value === event.value);
@@ -171,7 +172,11 @@ export class ObligationComponent implements OnInit, OnDestroy {
 
   async saveObligation(): Promise<void> {
     const selected = this.processOptions.find(option => option.value === this.formObligation.controls.process.value);
-    if (!selected) return;
+    if (!selected) {
+      this.formObligation.markAllAsTouched();
+      this.saveButton?.rejectSave();
+      return;
+    }
     this.formIsSaving = true;
     const sender: IObligationCreate = {
       idWorkpack: this.idWorkpack,

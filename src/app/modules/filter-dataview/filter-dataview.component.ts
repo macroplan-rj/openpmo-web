@@ -100,17 +100,9 @@ export class FilterDataviewComponent implements OnInit, OnDestroy {
   
   ) {
     this.loadFormFilter();
-    this.formFilter.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formFilter.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formFilter.dirty && this.formFilter.valid))
-      .subscribe(() => {
-        if (this.validadeRulesCards()) {
-          this.saveButton.showButton();
-        }
-
-      });
+      .pipe(takeUntil(this.$destroy), filter(() => this.formFilter.dirty))
+      .subscribe(() => this.saveButton.showButton());
     this.formFilter.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formFilter.dirty))
       .subscribe(() => {
@@ -326,30 +318,18 @@ export class FilterDataviewComponent implements OnInit, OnDestroy {
     this.ruleCards.push({
       typeCard: 'new-card'
     });
-    if (this.formFilter.valid && this.validadeRulesCards()) {
-      this.saveButton.showButton();
-    } else {
-      this.saveButton?.hideButton();
-    }
+    this.saveButton?.showButton();
   }
 
   handleDeleteCardItem(index) {
     this.ruleCards.splice(index, 1);
     this.cancelButton.showButton();
-    if (this.formFilter.valid && this.validadeRulesCards()) {
-      this.saveButton.showButton();
-    } else {
-      this.saveButton?.hideButton();
-    }
+    this.saveButton?.showButton();
   }
 
   handlePropertyValueChanged(event) {
     this.cancelButton.showButton();
-    if (this.formFilter.valid && this.validadeRulesCards()) {
-      this.saveButton.showButton();
-    } else {
-      this.saveButton?.hideButton();
-    }
+    this.saveButton?.showButton();
   }
 
   validadeRulesCards() {
@@ -362,6 +342,14 @@ export class FilterDataviewComponent implements OnInit, OnDestroy {
   }
 
   async handleOnSubmit() {
+    // SD-10606: o Salvar fica visivel; pendencias (nome, ordenacao, regras incompletas) sao avisadas aqui
+    if (this.saveButton?.blockIfInvalid(this.formFilter)) {
+      return;
+    }
+    if (!this.validadeRulesCards()) {
+      this.saveButton?.rejectSave();
+      return;
+    }
     this.cancelButton.hideButton();
     const sender: IFilterDataview = {
       id: this.idFilter,

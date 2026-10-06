@@ -99,14 +99,6 @@ export class ContractComponent implements OnInit, OnDestroy {
       protocol: [''],
     });
 
-    this.formContract.statusChanges
-      .pipe(
-        takeUntil(this.$destroy),
-        filter((status) => status === 'INVALID')
-      )
-      .subscribe(() => {
-        this.saveButton?.hideButton();
-      });
 
     this.formContract.valueChanges
       .pipe(
@@ -114,11 +106,8 @@ export class ContractComponent implements OnInit, OnDestroy {
         filter(() => this.formContract.dirty)
       )
       .subscribe(() => {
-        if (
-          !this.idContract &&
-          this.formContract.valid &&
-          this.formContract.controls.process.value
-        ) {
+        // SD-10606: obrigatorios pendentes nao escondem o Salvar (o clique avisa)
+        if (!this.idContract) {
           this.saveButton?.showButton();
         } else {
           this.saveButton?.hideButton();
@@ -502,6 +491,7 @@ export class ContractComponent implements OnInit, OnDestroy {
       !this.formContract.controls.process.value
     ) {
       this.formContract.markAllAsTouched();
+      this.saveButton?.rejectSave();
       return;
     }
 

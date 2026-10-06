@@ -74,11 +74,8 @@ export class PersonProfileComponent implements OnInit, OnDestroy {
       idOrganization: [null],
       unify: [false]
     });
-    this.formPerson.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formPerson.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formPerson.dirty && this.formPerson.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formPerson.dirty))
       .subscribe(() => this.saveButton.showButton());
     this.formPerson.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formPerson.dirty))
@@ -326,17 +323,13 @@ export class PersonProfileComponent implements OnInit, OnDestroy {
     this.avatarData = event;
     this.changedAvatar = true;
     this.cancelButton.showButton();
-    if (this.formPerson.valid) {
-      this.saveButton.showButton();
-    }
+    this.saveButton.showButton();
   }
 
   async handleDeleteAvatar() {
     this.deletedAvatar = true;
     this.cancelButton.showButton();
-    if (this.formPerson.valid) {
-      this.saveButton.showButton();
-    }
+    this.saveButton.showButton();
   }
 
   async savePerson() {

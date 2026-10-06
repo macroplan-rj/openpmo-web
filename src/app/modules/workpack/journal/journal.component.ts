@@ -120,9 +120,7 @@ export class JournalComponent implements OnInit {
 
   deleteEvidence(urlImg) {
     this.cardItemsEvidences = this.cardItemsEvidences.filter(item => item.urlImg !== urlImg);
-    if (this.formJournal.valid) {
-      this.saveButton.showButton();
-    }
+    this.saveButton.showButton();
   }
 
   handleUploadEvidence(files) {

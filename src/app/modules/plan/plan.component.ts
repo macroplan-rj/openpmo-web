@@ -155,11 +155,8 @@ export class PlanComponent implements OnInit, OnDestroy {
     });
     this.formPlan.controls.modelName.disable();
     this.formPlan.controls.modelFullName.disable();
-    this.formPlan.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formPlan.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formPlan.dirty && this.formPlan.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formPlan.dirty))
       .subscribe(() => {
         this.saveButton.showButton();
       });

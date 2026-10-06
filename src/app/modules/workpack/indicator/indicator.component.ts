@@ -153,16 +153,10 @@ export class IndicatorComponent implements OnInit, OnDestroy {
       justification: [null],
     });
 
-    this.formIndicator.statusChanges
-      .pipe(
-        takeUntil(this.$destroy),
-        filter((status) => status === 'INVALID')
-      )
-      .subscribe(() => this.saveButton?.hideButton());
     this.formIndicator.valueChanges
       .pipe(
         takeUntil(this.$destroy),
-        filter(() => this.formIndicator.dirty && this.formIndicator.valid)
+        filter(() => this.formIndicator.dirty)
       )
       .subscribe(() => this.saveButton.showButton());
     this.formIndicator.valueChanges
@@ -431,7 +425,7 @@ onDateChange(): void {
   }
 
   // Se as datas ficaram válidas novamente, mostra o botão
-  if (this.formIndicator.valid && this.formIndicator.dirty) {
+  if (this.formIndicator.dirty) {
     this.saveButton.showButton();
   }
 
@@ -457,32 +451,20 @@ onDateChange(): void {
   onExpectedGoalChange(data: any): void {
     data.lastUpdate = this.getCurrentDate();
     this.formIndicator.markAsDirty();
-    if (this.formIndicator.valid) {
-      this.saveButton.showButton();
-    } else {
-      this.saveButton.hideButton();
-    }
+    this.saveButton.showButton();
     this.cancelButton.showButton();
   }
 
   onAchievedGoalChange(data: any): void {
     this.formIndicator.markAsDirty();
     data.lastUpdate = this.getCurrentDate();
-    if (this.formIndicator.valid) {
-      this.saveButton.showButton();
-    } else {
-      this.saveButton.hideButton();
-    }
+    this.saveButton.showButton();
     this.cancelButton.showButton();
   }
 
   onJustificationChange(): void {
     this.formIndicator.markAsDirty();
-    if (this.formIndicator.valid) {
-      this.saveButton.showButton();
-    } else {
-      this.saveButton.hideButton();
-    }
+    this.saveButton.showButton();
     this.cancelButton.showButton();
   }
 

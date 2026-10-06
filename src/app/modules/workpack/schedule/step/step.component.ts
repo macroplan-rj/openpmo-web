@@ -180,16 +180,10 @@ export class StepComponent implements OnInit, OnDestroy {
       distribution: 'SIGMOIDAL',
     });
     this.idPlan = Number(localStorage.getItem('@currentPlan'));
-    this.formStep.statusChanges
-      .pipe(
-        takeUntil(this.$destroy),
-        filter((status) => status === 'INVALID')
-      )
-      .subscribe(() => this.handleChangeValuesCardItems());
     this.formStep.valueChanges
       .pipe(
         takeUntil(this.$destroy),
-        filter(() => this.formStep.dirty && this.formStep.valid)
+        filter(() => this.formStep.dirty)
       )
       .subscribe(() => this.handleChangeValuesCardItems());
     this.formStep.valueChanges
@@ -645,32 +639,26 @@ export class StepComponent implements OnInit, OnDestroy {
 
   handleChangeValuesCardItems() {
     this.reloadCostAssignmentTotals();
-    if (this.formStep.valid) {
-      if (
-        this.costAssignmentsCardItems &&
-        this.costAssignmentsCardItems.length > 1
-      ) {
-        this.reloadCostAssignmentTotals();
-      }
-      this.saveButton.showButton();
-    } else {
-      this.saveButton.hideButton();
+    // SD-10606: o Salvar nao some com obrigatorio vazio; o clique (saveButton [form]) avisa
+    if (
+      this.costAssignmentsCardItems &&
+      this.costAssignmentsCardItems.length > 1
+    ) {
+      this.reloadCostAssignmentTotals();
     }
+    this.saveButton.showButton();
   }
 
   handleChangeTotalsValues() {
     this.cancelButton.showButton();
-    if (this.formStep.valid) {
-      if (
-        this.costAssignmentsCardItems &&
-        this.costAssignmentsCardItems.length > 1
-      ) {
-        this.reloadCostAssignmentTotals();
-      }
-      this.saveButton.showButton();
-    } else {
-      this.saveButton.hideButton();
+    // SD-10606: o Salvar nao some com obrigatorio vazio; o clique (saveButton [form]) avisa
+    if (
+      this.costAssignmentsCardItems &&
+      this.costAssignmentsCardItems.length > 1
+    ) {
+      this.reloadCostAssignmentTotals();
     }
+    this.saveButton.showButton();
   }
 
   reloadCostAssignmentTotals() {

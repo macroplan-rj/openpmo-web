@@ -77,7 +77,7 @@
   </div>
 </div>
 <app-buttons-container>
-  <app-save-button #saveButton (save)="saveIssueResponse()"></app-save-button>
+  <app-save-button [form]="formIssueResponse" #saveButton (save)="saveIssueResponse()"></app-save-button>
   <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
 </app-buttons-container>
 
