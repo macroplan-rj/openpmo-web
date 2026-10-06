@@ -1,0 +1,12 @@
+<div class="progress-bar-summary" *ngIf="progressBar">
+  <span class="progress-bar-summary-title" *ngIf="titleKey">{{ titleKey | translate }}</span>
+  <div class="progress-bar-summary-line" *ngIf="hasBaseline">
+    {{ 'plannedBaseline' | translate }}: <strong>{{ format(progressBar.baselinePlanned) }}</strong>
+  </div>
+  <div class="progress-bar-summary-line">
+    {{ 'reprogrammed' | translate }}: <strong>{{ format(progressBar.total) }}</strong>
+  </div>
+  <div class="progress-bar-summary-line">
+    {{ 'actual' | translate }}: <strong>{{ format(progressBar.progress) }}</strong>
+  </div>
+</div>

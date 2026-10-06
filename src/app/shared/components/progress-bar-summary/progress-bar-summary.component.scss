@@ -1,0 +1,19 @@
+@use "src/variables" as v;
+
+.progress-bar-summary {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #646464;
+  white-space: nowrap;
+
+  .progress-bar-summary-title {
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+    color: v.$fontTitle;
+  }
+
+  .progress-bar-summary-line strong {
+    color: v.$fontTitle;
+  }
+}

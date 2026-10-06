@@ -1,0 +1,18 @@
+<span class="app-status-types" *ngIf="(showLabel && current) || hasOptions">
+  <span class="status-types-label" *ngIf="showLabel && current">
+    {{ 'statusTypesLabel' | translate }}: <span class="status-types-current">{{ current }}</span>
+  </span>
+  <i *ngIf="hasOptions" class="pi pi-info-circle status-types-icon"
+    (mouseenter)="statusTypesPanel.show($event)" (mouseleave)="statusTypesPanel.hide()"
+    (click)="$event.stopPropagation(); $event.preventDefault()"></i>
+  <p-overlayPanel #statusTypesPanel styleClass="status-types-overlay-panel">
+    <div class="status-types-panel">
+      <span class="status-types-title">{{ 'statusTypes' | translate }}</span>
+      <ul class="status-types-list">
+        <li *ngFor="let option of options" class="status-types-option" [class.current]="isCurrent(option)">
+          {{ option }}
+        </li>
+      </ul>
+    </div>
+  </p-overlayPanel>
+</span>
