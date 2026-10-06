@@ -25,6 +25,7 @@
                   <i class="far fa-question-circle" [pTooltip]="'help.schedule.start' | translate"></i>
                 </label>
               </span>
+              <app-input-message [form]="formSchedule" field="start"></app-input-message>
             </div>
             <div class="p-field" [class.responsive]="responsive">
               <span class="p-float-label" [class.responsive]="responsive">
@@ -36,6 +37,7 @@
                   <i class="far fa-question-circle" [pTooltip]="'help.schedule.finish' | translate"></i>
                 </label>
               </span>
+              <app-input-message [form]="formSchedule" field="end"></app-input-message>
             </div>
           </div>
           <div class="schedule-totals">
@@ -52,6 +54,7 @@
                     <i class="far fa-question-circle" [pTooltip]="'help.schedule.estimatedPhysical' | translate"></i>  
                     </label>
                   </span>
+                  <app-input-message [form]="formSchedule" field="plannedWork"></app-input-message>
                   
                 </div>
                 <div class="p-field" [class.responsive]="responsive">

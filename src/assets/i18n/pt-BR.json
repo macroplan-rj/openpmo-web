@@ -920,6 +920,7 @@
   "myDefault": "Meu padrão",
   "fullLine": "Linha inteira",
   "required": "Obrigatório",
+  "requiredFill": "Preenchimento obrigatório",
   "multipleSelection": "Múltiplas seleções",
   "minimum": "Mínimo",
   "maximum": "Máximo",

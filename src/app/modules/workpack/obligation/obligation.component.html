@@ -38,8 +38,9 @@
               <ng-template let-process pTemplate="selectedItem"><span class="process-option-label" [pTooltip]="process.label">{{ truncateProcessLabel(process.label) }}</span></ng-template>
               <ng-template let-process pTemplate="item"><span class="process-option-label" [pTooltip]="process.label">{{ truncateProcessLabel(process.label) }}</span></ng-template>
             </p-dropdown>
-            <label class="app-input-label" for="process">{{ 'obligationNote' | translate }} *</label>
+            <label class="app-input-label" for="process">{{ 'obligationNote' | translate }}<span class="required-indicator">*</span></label>
           </span>
+          <app-input-message [form]="formObligation" field="process"></app-input-message>
         </div>
 
         <div *ngIf="idObligation" class="obligation-field text-medium app-property-text">

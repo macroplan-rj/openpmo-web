@@ -889,6 +889,7 @@
   "myDefault": "My default",
   "fullLine": "Full line",
   "required": "Required",
+  "requiredFill": "Required field",
   "multipleSelection": "Multiple selection",
   "minimum": "Minimum",
   "maximum": "Maximum",

@@ -124,8 +124,9 @@
                     [yearRange]="yearRangeCalculated"
                   >
                   </p-calendar>
-                  <label class="indicators-label" for="float-start">{{ "startDate" | translate }}</label>
+                  <label class="indicators-label" for="float-start">{{ "startDate" | translate }} *</label>
                 </span>
+                <app-input-message [form]="formIndicator" field="startDate"></app-input-message>
               </div>
               
               <div class="p-field mobile" style="width: 20%;">
@@ -145,8 +146,9 @@
                 
                   >
                   </p-calendar>
-                  <label class="indicators-label" for="float-start">{{ "endDate" | translate }}</label>
+                  <label class="indicators-label" for="float-start">{{ "endDate" | translate }} *</label>
                 </span>
+                <app-input-message [form]="formIndicator" field="endDate"></app-input-message>
               </div>
 
               <!-- Periodicidade -->
