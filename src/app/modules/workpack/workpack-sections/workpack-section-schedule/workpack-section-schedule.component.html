@@ -19,6 +19,10 @@
         [icon]="showDetails ? 'far fa-eye-slash' : 'far fa-eye'" iconPos="left"
         [label]="showDetails ? translateSrv.instant('hideDetails') : translateSrv.instant('showDetails')">
       </button>
+      <button type="button" class="p-button-outlined button-edit" (click)="handleEditSchedule()" pButton
+        [disabled]="!editPermission" icon="pi pi-pencil" iconPos="left"
+        [label]="translateSrv.instant('editSchedule')">
+      </button>
       <button type="button" class="p-button-text button-delete" (click)="handleDeleteSchedule()" pButton
         [disabled]="!editPermission" icon="fas fa-trash-alt" iconPos="left"
         [label]="translateSrv.instant('deleteSchedule')" *ngIf="!this.schedule.baselineStart">

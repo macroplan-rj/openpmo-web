@@ -821,6 +821,19 @@ export class WorkpackSectionScheduleComponent implements OnInit, OnDestroy, Afte
     });
   }
 
+  handleEditSchedule() {
+    if (!this.editPermission || !this.schedule) {
+      return;
+    }
+    this.router.navigate(['workpack/schedule'], {
+      queryParams: {
+        idWorkpack: this.workpackParams.idWorkpack,
+        idSchedule: this.schedule.id,
+        unitMeansureName: this.unitMeansure?.name,
+      },
+    });
+  }
+
   handleCreateNewStep(params) {
     this.router.navigate(['/workpack', 'schedule', 'step'], {
       queryParams: {

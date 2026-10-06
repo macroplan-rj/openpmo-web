@@ -9,6 +9,14 @@ export interface ISchedule {
   costs: ICost[];
 }
 
+export interface IScheduleUpdate {
+  end: Date | string;
+  plannedWork: number;
+  actualWork: number;
+  distribution: string;
+  costs: ICost[];
+}
+
 export interface ICost {
   id?: number;
   actualCost: number;
@@ -28,6 +36,7 @@ export interface IScheduleDetail {
   baselinePlaned?: number;
   planedCost: number;
   baselineCost?: number;
+  distribution?: string;
   groupStep: IGroupStep[];
 }
 

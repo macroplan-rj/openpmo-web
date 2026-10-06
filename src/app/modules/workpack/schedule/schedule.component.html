@@ -1,6 +1,6 @@
 <div class="app-schedule">
   <div class="app-content-header" [class.mobile]="responsive">
-    <span>{{ "newSchedule" | translate }}</span>
+    <span>{{ (isEditMode ? "editSchedule" : "newSchedule") | translate }}</span>
   </div>
   
   <div class="card-properties-schedule" *ngIf="unitMeasure && cardScheduleProperties">
@@ -44,13 +44,23 @@
             <span class="totals-title">{{"totals" | translate}}</span>
             <div class="unitMeasureValues">
               <div class="p-formgroup-inline" [class.responsive]="responsive">
+                <div class="p-field" [class.responsive]="responsive" *ngIf="isEditMode && hasBaseline">
+                  <span class="p-float-label" [class.responsive]="responsive">
+                    <p-inputNumber class="app-input-number" id="float-baseline-planned" formControlName="baselinePlannedWork"
+                      [class.responsive]="responsive">
+                    </p-inputNumber>
+                    <label class="app-input-label" for="float-baseline-planned">{{unitMeasure}} {{ "planned" |translate}} *
+                    <i class="far fa-question-circle" [pTooltip]="'help.schedule.estimatedPhysical' | translate"></i>
+                    </label>
+                  </span>
+                </div>
                 <div class="p-field" [class.responsive]="responsive">
                   <span class="p-float-label" [class.responsive]="responsive">
                     <p-inputNumber class="app-input-number" id="float-planned" formControlName="plannedWork"
                     [class.red]="formSchedule && formSchedule.controls.plannedWork.value < 0"
                       (onInput)="handleChangeValues()" (onBlur)="handleChangeValues()" [class.responsive]="responsive">
                     </p-inputNumber>
-                    <label class="app-input-label" for="float-planned">{{unitMeasure}} {{ "planned" |translate}} * 
+                    <label class="app-input-label" for="float-planned">{{unitMeasure}} {{ (isEditMode && hasBaseline ? "reprogrammed" : "planned") |translate}}{{ isEditMode && hasBaseline ? '' : ' *' }} 
                     <i class="far fa-question-circle" [pTooltip]="'help.schedule.estimatedPhysical' | translate"></i>  
                     </label>
                   </span>
@@ -73,7 +83,44 @@
                   </div>
                 </div>
               </div>
-              <div class="cost-assignments-totals" [class.responsive]="responsive">
+              <div class="p-formgroup-inline" [class.responsive]="responsive" *ngIf="singleCostEdit">
+                <div class="p-field" [class.responsive]="responsive" *ngIf="hasBaseline">
+                  <span class="p-float-label" [class.responsive]="responsive">
+                    <p-inputNumber class="app-input-number" id="float-baseline-cost" formControlName="baselineCost"
+                      mode="decimal" [locale]="currentLang" [minFractionDigits]="2" [maxFractionDigits]="2"
+                      [class.responsive]="responsive">
+                    </p-inputNumber>
+                    <label class="app-input-label" for="float-baseline-cost">$ {{ "planned" |translate}}
+                      <i class="far fa-question-circle" [pTooltip]="'help.schedule.estimatedCostTotal' | translate"></i>
+                    </label>
+                  </span>
+                </div>
+                <div class="p-field" [class.responsive]="responsive">
+                  <span class="p-float-label" [class.responsive]="responsive">
+                    <p-inputNumber class="app-input-number" id="float-planned-cost" formControlName="plannedCost"
+                      mode="decimal" [locale]="currentLang" [minFractionDigits]="2" [maxFractionDigits]="2"
+                      [class.red]="formSchedule.controls.plannedCost.value < 0"
+                      (onInput)="handleChangeValues()" (onBlur)="handleChangeValues()" [class.responsive]="responsive">
+                    </p-inputNumber>
+                    <label class="app-input-label" for="float-planned-cost">$ {{ (hasBaseline ? "reprogrammed" : "planned") |translate}}
+                      <i class="far fa-question-circle" [pTooltip]="'help.schedule.estimatedCostTotal' | translate"></i>
+                    </label>
+                  </span>
+                </div>
+                <div class="p-field" [class.responsive]="responsive">
+                  <span class="p-float-label" [class.responsive]="responsive">
+                    <p-inputNumber class="app-input-number" id="float-actual-cost" formControlName="actualCost"
+                      mode="decimal" [locale]="currentLang" [minFractionDigits]="2" [maxFractionDigits]="2"
+                      [class.red]="formSchedule.controls.actualCost.value < 0"
+                      (onInput)="handleChangeValues()" (onBlur)="handleChangeValues()" [class.responsive]="responsive">
+                    </p-inputNumber>
+                    <label class="app-input-label" for="float-actual-cost">$ {{ "actual" |translate}}
+                      <i class="far fa-question-circle" [pTooltip]="'help.schedule.actualCostTotal' | translate"></i>
+                    </label>
+                  </span>
+                </div>
+              </div>
+              <div class="cost-assignments-totals" [class.responsive]="responsive" *ngIf="!singleCostEdit">
                 <div class="planned-total">
                   <span class="label"> $ {{ "planned" |translate }}
                     <i class="far fa-question-circle" [pTooltip]="'help.schedule.estimatedCostTotal' | translate"></i>
@@ -111,6 +158,7 @@
             <ng-template let-cardItem let-index="rowIndex" pTemplate="gridItem">
               <div class="p-col-12 p-md-3 p-sm-12 card-item-container" [class.responsive]="responsive">
                 <app-cost-assignment-card-item [properties]="cardItem" [scheduleStartDate]="scheduleStartDate"
+                  [hasActiveBaseline]="isEditMode && hasBaseline"
                   (costChanged)="handleChangeValuesCardItems()">
                 </app-cost-assignment-card-item>
               </div>
