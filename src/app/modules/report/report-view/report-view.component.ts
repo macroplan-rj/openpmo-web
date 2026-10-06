@@ -27,6 +27,7 @@ import { ReportPreferredFormatEnum } from 'src/app/shared/enums/ReportPreferredF
 import { IReportGenerate } from 'src/app/shared/interfaces/IReportGenerate';
 import { MenuService } from 'src/app/shared/services/menu.service';
 import { IMenuWorkpack } from 'src/app/shared/interfaces/IMenu';
+import { areRequiredPropertiesFilled, checkRequiredProperties, checkRequiredProperty } from 'src/app/shared/utils/required-properties';
 
 @Component({
   selector: 'app-report-view',
@@ -453,6 +454,7 @@ export class ReportViewComponent implements OnInit, OnDestroy {
 
   async handleGenerateReport() {
     if (!this.generateReportEnabled) {
+      checkRequiredProperties(this.reportProperties, this.translateSrv.instant('requiredFill'));
       this.messageSrv.add({
         detail: this.translateSrv.instant('messages.validateGenerateReport'),
         severity: 'warn',
@@ -557,38 +559,16 @@ export class ReportViewComponent implements OnInit, OnDestroy {
       && this.selectedWorkpacks && this.selectedWorkpacks.length > 0;
   }
 
+  /**
+   * SD-10606: recalcula o obrigatorio so da propriedade alterada (a mensagem some ao preencher)
+   * e devolve se todas as obrigatorias estao preenchidas; handleGenerateReport marca todas.
+   */
   checkPropertiesRequiredValid(property?: PropertyTemplateModel) {
-    const properties = this.reportProperties;
-    const validated = properties
-      .filter(propReq => !!propReq.required)
-      .map((prop) => {
-        let valid = (prop.value instanceof Array
-          ? (prop.value.length > 0)
-          : typeof prop.value == 'boolean' || typeof prop.value == 'number'
-          || !!prop.value || (prop.value !== null && prop.value !== undefined && prop.value !== ''));
-        if (['OrganizationSelection', 'UnitSelection', 'LocalitySelection'].includes(prop.type)) {
-          if (prop.type === 'LocalitySelection') {
-            if (!prop.multipleSelection) {
-              const selectedLocality = prop.localitiesSelected as TreeNode;
-              prop.selectedValues = [selectedLocality.data];
-            }
-            if (prop.multipleSelection) {
-              const selectedLocality = prop.localitiesSelected as TreeNode[];
-              prop.selectedValues = selectedLocality.filter(locality => locality.data !== prop.idDomain)
-                .map(l => l.data);
-            }
-          }
-          valid = (typeof prop.selectedValue === 'number' || (prop.selectedValues instanceof Array ?
-            prop.selectedValues.length > 0 : typeof prop.selectedValues == 'number'));
-        }
-        if (property && property.idPropertyModel === prop.idPropertyModel) {
-          prop.invalid = !valid;
-          prop.message = valid ? '' : this.translateSrv.instant('required');
-        }
-        return valid;
-      })
-      .reduce((a, b) => a ? b : a, true);
-    return validated;
+    if (property) {
+      checkRequiredProperty(property, this.translateSrv.instant('requiredFill'),
+        property.type === TypePropertyModelEnum.GroupModel);
+    }
+    return areRequiredPropertiesFilled(this.reportProperties);
   }
 
   checkPropertiesStringValid(property?: PropertyTemplateModel) {
@@ -608,7 +588,7 @@ export class ReportViewComponent implements OnInit, OnDestroy {
           if (property && property.idPropertyModel === prop.idPropertyModel) {
             prop.invalid = !valid;
             prop.message = !valid ? (String(prop.value).length > 0 ? prop.message = this.translateSrv.instant('maxLength', { max: prop.max })
-              : prop.message = this.translateSrv.instant('required')) : '';
+              : prop.message = this.translateSrv.instant('requiredFill')) : '';
           }
         }
         return valid;
@@ -633,7 +613,7 @@ export class ReportViewComponent implements OnInit, OnDestroy {
           if (property && property.idPropertyModel === prop.idPropertyModel) {
             prop.invalid = !valid;
             prop.message = !valid ? (Number(prop.value) > 0 ? prop.message = this.translateSrv.instant('maxValue')
-              : prop.message = this.translateSrv.instant('required')) : '';
+              : prop.message = this.translateSrv.instant('requiredFill')) : '';
           }
         }
         return valid;

@@ -35,5 +35,8 @@
       <app-property-dynamic-selection *ngSwitchCase="types.DynamicSelectionModel" [property]="groupedProp"
         (changed)="changed.emit($event)"></app-property-dynamic-selection>
     </ng-container>
+    <span class="input-message-error" *ngIf="groupedProp.invalid">
+      {{ groupedProp.message }}
+    </span>
   </div>
 </p-panel>

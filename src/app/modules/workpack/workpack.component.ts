@@ -60,6 +60,7 @@ import { IUniversalSearch } from 'src/app/shared/interfaces/universal-search.int
 import { ObligationsService } from 'src/app/shared/services/obligations.service';
 import { ProcurementsService } from 'src/app/shared/services/procurements.service';
 import { AgreementsService } from 'src/app/shared/services/agreements.service';
+import { hasInvalidProperty } from 'src/app/shared/utils/required-properties';
 
 @Component({
   selector: 'app-workpack',
@@ -1484,6 +1485,21 @@ export class WorkpackComponent implements OnDestroy, OnInit {
 
   async saveWorkpack(event) {
     const properties = event.properties;
+    // SD-10606: valida antes de qualquer chamada (inclusive a de concluir entrega) e mantem o
+    // Salvar visivel; as propriedades pendentes ja foram marcadas pela secao de propriedades.
+    if (hasInvalidProperty(properties)) {
+      this.saveButton?.rejectSave(false);
+      this.cancelButton?.showButton();
+      this.workpackSrv.nextPendingChanges(true);
+      this.messageSrv.add({
+        severity: 'warn',
+        summary: this.translateSrv.instant('attention'),
+        detail: this.translateSrv.instant('messages.requiredInformationsMustBeFilled'),
+        life: 3000
+      });
+      this.scrollTop();
+      return;
+    }
     let updateSuccess = true;
     if (!!this.changedStatusCompleted) {
       if (this.workpack.type === TypeWorkpackEnum.MilestoneModel) {
@@ -1517,16 +1533,6 @@ export class WorkpackComponent implements OnDestroy, OnInit {
       }
       return p.getValues();
     });
-    if (properties.filter(p => p.invalid).length > 0) {
-      this.messageSrv.add({
-        severity: 'warn',
-        summary: this.translateSrv.instant('messages.invalidField'),
-        detail: this.translateSrv.instant('messages.invalidField'),
-        life: 3000
-      });
-      this.scrollTop();
-      return;
-    }
     const workpackName = (this.workpackProperties.find(prop => prop.name === 'name')).value as string;
     const workpackFullName = (this.workpackProperties.find(prop => prop.name === 'fullName')).value as string;
     let milestoneDate;
