@@ -86,7 +86,7 @@
     <span>{{idLocality}}</span>
   </div>
   <app-buttons-container>
-    <app-save-button (save)="handleOnSubmit()"></app-save-button>
+    <app-save-button [form]="formLocality" (save)="handleOnSubmit()"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
 </div>

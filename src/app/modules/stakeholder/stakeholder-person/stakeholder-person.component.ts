@@ -144,7 +144,7 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
       contactEmail: ['', [Validators.email]],
     });
     this.stakeholderForm.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.stakeholderForm.dirty && this.stakeholderForm.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.stakeholderForm.dirty))
       .subscribe(() => {
         this.handleShowSaveButton();
       });
@@ -818,28 +818,26 @@ export class StakeholderPersonComponent implements OnInit, OnDestroy {
 
   handleShowSaveButton() {
     this.cancelButton.showButton();
-    if (this.stakeholderForm.valid && this.stakeholderForm.controls.fullName.value.trim().length > 0) {
-      return this.validateStakeholder()
-        ? this.saveButton?.showButton()
-        : this.saveButton?.hideButton();
-    } else {
-      this.saveButton?.hideButton();
-    }
+    // SD-10606: pendencias (nome, papeis) nao escondem o Salvar; saveStakeholder avisa
+    this.saveButton?.showButton();
   }
 
   async saveStakeholder() {
-    this.cancelButton.hideButton();
     if (
       !this.stakeholderForm.valid
       || !this.stakeholderForm.controls.fullName.value
       || this.stakeholderForm.controls.fullName.value.trim().length === 0
     ) {
+      this.stakeholderForm.markAllAsTouched();
+      this.saveButton?.rejectSave();
       return;
     }
     const validated = this.validateStakeholder();
     if (!validated) {
+      this.saveButton?.rejectSave();
       return;
     }
+    this.cancelButton.hideButton();
     this.formIsSaving = true;
     const permissions = this.stakeholderPermissions?.filter(permission =>
       !permission.inheritedFrom && permission.level && permission.level !== 'None');

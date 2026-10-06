@@ -219,7 +219,7 @@
   </div>
   
   <app-buttons-container *ngIf="!isLoading && !idContract">
-    <app-save-button
+    <app-save-button [form]="formContract"
       #saveButton
       (save)="saveContract()"
     >

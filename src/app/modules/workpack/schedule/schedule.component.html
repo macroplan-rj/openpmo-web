@@ -119,6 +119,6 @@
   </div>
 </div>
 <app-buttons-container>
-  <app-save-button (save)="saveSchedule()"></app-save-button>
+  <app-save-button [form]="formSchedule" (save)="saveSchedule()"></app-save-button>
   <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
 </app-buttons-container>

@@ -298,7 +298,7 @@
   </div>
   
   <app-buttons-container *ngIf="!isLoading && !idCooperation">
-    <app-save-button
+    <app-save-button [form]="formCooperation"
       #saveButton
       (save)="saveCooperation()"
     >

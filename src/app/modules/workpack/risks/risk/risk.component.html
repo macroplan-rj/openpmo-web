@@ -134,7 +134,7 @@
     <span>{{idRisk}}</span>
   </div>
   <app-buttons-container>
-    <app-save-button (save)="saveRisk()"></app-save-button>
+    <app-save-button [form]="formRisk" (save)="saveRisk()"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
 

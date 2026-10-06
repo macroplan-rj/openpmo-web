@@ -129,6 +129,6 @@
   </div>
 </div>
 <app-buttons-container>
-  <app-save-button #saveButton (save)="saveRiskResponse()"></app-save-button>
+  <app-save-button [form]="formRiskResponse" #saveButton (save)="saveRiskResponse()"></app-save-button>
   <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
 </app-buttons-container>

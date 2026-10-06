@@ -135,11 +135,8 @@ export class DomainLocalityComponent implements OnInit, OnDestroy {
       latitude: null,
       longitude: null,
     });
-    this.formLocality.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formLocality.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formLocality.dirty && this.formLocality.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formLocality.dirty))
       .subscribe(() => { this.saveButton.showButton(); });
     this.formLocality.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formLocality.dirty))

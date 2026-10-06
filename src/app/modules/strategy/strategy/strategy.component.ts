@@ -129,9 +129,6 @@ export class StrategyComponent implements OnDestroy {
       name: ['', [Validators.required, Validators.maxLength(25)]],
       fullName: ['', [Validators.required]]
     });
-    this.formStrategy.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formStrategy.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formStrategy.dirty))
       .subscribe(() => {this.saveButton.showButton(); this.cancelButton.showButton() });
@@ -276,9 +273,7 @@ export class StrategyComponent implements OnDestroy {
       this.sharedWithAll = false;
     }
     this.cancelButton.showButton();
-    if (this.formStrategy.valid) {
-      this.saveButton.showButton();
-    }
+    this.saveButton.showButton();
   }
 
   async loadCostAccountModel() {

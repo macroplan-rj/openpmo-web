@@ -87,11 +87,8 @@ export class IssueResponseComponent implements OnInit {
       plan: ['', Validators.required],
       responsible: ['', Validators.required],
     });
-    this.formIssueResponse.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     this.formIssueResponse.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => this.formIssueResponse.dirty && this.formIssueResponse.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => this.formIssueResponse.dirty))
       .subscribe(() => this.saveButton.showButton());
     this.formIssueResponse.valueChanges
       .pipe(takeUntil(this.$destroy), filter(() => this.formIssueResponse.dirty))

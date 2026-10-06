@@ -225,11 +225,8 @@ export class MeasureUnitComponent implements OnInit {
         this.formsMeasureUnits.forEach(item => item.form.disable());
       } else {
         this.formsMeasureUnits.forEach(item => {
-          item.form.statusChanges
-            .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-            .subscribe(() => this.saveButton?.hideButton());
           item.form.valueChanges
-            .pipe(takeUntil(this.$destroy), filter(() => item.form.dirty && item.form.valid))
+            .pipe(takeUntil(this.$destroy), filter(() => item.form.dirty))
             .subscribe(() => {this.saveButton?.showButton(); this.cancelButton.showButton()});
         });
       }
@@ -248,6 +245,13 @@ export class MeasureUnitComponent implements OnInit {
   };
 
   async handleOnSubmit() {
+    // SD-10606: unidade alterada ou nova com obrigatorio vazio nao e mais ignorada em silencio
+    const pendingForms = this.formsMeasureUnits
+      .filter(item => item.form.enabled && (item.form.dirty || !item.form.value.id))
+      .map(item => item.form);
+    if (this.saveButton?.blockIfInvalid(...pendingForms)) {
+      return;
+    }
     this.cancelButton.hideButton();
     const formItemsChanged = this.formsMeasureUnits.filter(item => item.form.dirty && item.form.valid);
     formItemsChanged.forEach(async ({ form, id }) => {
@@ -325,11 +329,8 @@ export class MeasureUnitComponent implements OnInit {
         precision: [0, this.validatorsPrecision],
       })
     };
-    newForm.form.statusChanges
-      .pipe(takeUntil(this.$destroy), filter(status => status === 'INVALID'))
-      .subscribe(() => this.saveButton?.hideButton());
     newForm.form.valueChanges
-      .pipe(takeUntil(this.$destroy), filter(() => newForm.form.dirty && newForm.form.valid))
+      .pipe(takeUntil(this.$destroy), filter(() => newForm.form.dirty))
       .subscribe(() => {this.saveButton?.showButton(); this.cancelButton?.showButton()});
     this.formsMeasureUnits.push(newForm);
   }

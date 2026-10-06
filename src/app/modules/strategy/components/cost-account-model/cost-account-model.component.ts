@@ -312,53 +312,38 @@ export class CostAccountModelComponent implements OnInit {
     this.cardProperties.isLoading = false;
   }
 
+  /**
+   * SD-10606: o Salvar nao some mais por pendencia nas propriedades; as mesmas regras sao
+   * avaliadas em propertiesValidationError() e avisadas no clique (handleOnSubmit).
+   */
   checkProperties() {
     this.cancelButton.showButton();
+    this.saveButton?.showButton();
+  }
+
+  /** Retorna a chave i18n do primeiro problema que impede salvar o modelo, ou null. */
+  propertiesValidationError(): string {
     const properties: IWorkpackModelProperty[] = [...this.modelProperties];
     const hasInvalidMax = properties.some(p =>
       ['IntegerModel', 'TextModel', 'TextAreaModel'].includes(p.type) &&
       !p.max
     );
-    if (hasInvalidMax) {
-      this.saveButton?.hideButton();
-      return;
-    }
     // Value check
-    const propertiesChecks: { valid: boolean; invalidKeys: string[]; prop: IWorkpackModelProperty }[] = properties.map(p => ({
-      valid: p.requiredFields && p.requiredFields
-        .map(r => (p[r] instanceof Array
-          ? p[r].length > 0
-          : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r]))
-        .reduce((acc, v) => acc ? v : acc, true),
-      invalidKeys: p.requiredFields
-        .filter(r => !(p[r] instanceof Array
-          ? p[r].length > 0
-          : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r])),
-      prop: p
-    }));
-    const arePropertiesValid = propertiesChecks.reduce((a, b) => a ? b.valid : a, true);
-    if (!arePropertiesValid) {
-      this.saveButton?.hideButton();
-      return;
+    const arePropertiesValid = properties.every(p => !!p.requiredFields && p.requiredFields
+      .every(r => (p[r] instanceof Array
+        ? p[r].length > 0
+        : typeof p[r] == 'boolean' || typeof p[r] == 'number' || !!p[r])));
+    if (hasInvalidMax || !arePropertiesValid) {
+      return 'messages.requiredInformationsMustBeFilled';
     }
     const separationForDuplicateCheck = properties.map(prop => [prop.name, prop.label])
       .reduce((a, b) => ((a[0].push(b[0])), a[1].push(b[1]), a), [[], []]);
-    // Duplicated name check
-    if (new Set(separationForDuplicateCheck[0]).size !== properties.length) {
-      this.saveButton?.hideButton();
-      return;
+    // Duplicated name / label check
+    if (new Set(separationForDuplicateCheck[0]).size !== properties.length
+      || new Set(separationForDuplicateCheck[1]).size !== properties.length) {
+      return 'messages.invalidForm';
     }
-    
-    // Duplicated label check
-    if (new Set(separationForDuplicateCheck[1]).size !== properties.length) {
-      this.saveButton?.hideButton();
-      return;
-    }
-    let showButton = true;
-    if (showButton) {
-      this.saveButton?.showButton();
-      return;
-    }
+    return null;
   }
 
   async checkProperty(property: IWorkpackModelProperty) {
@@ -594,12 +579,24 @@ export class CostAccountModelComponent implements OnInit {
     };
     newProperty.isCollapsed = false;
     await this.checkProperty(newProperty);
-    this.saveButton?.hideButton();
+    // SD-10606: propriedade nova (ainda sem nome/rotulo) nao esconde o Salvar; o clique avisa
+    this.saveButton?.showButton();
     this.cancelButton.showButton();
     return this.modelProperties.push(newProperty);
   }
 
   async handleOnSubmit() {
+    const validationError = this.propertiesValidationError();
+    if (validationError) {
+      this.saveButton?.rejectSave(false);
+      this.messageSrv.add({
+        severity: 'warn',
+        summary: this.translateSrv.instant('attention'),
+        detail: this.translateSrv.instant(validationError),
+        life: 3000
+      });
+      return;
+    }
     this.cancelButton.hideButton();
     this.modelProperties.forEach(prop => {
       delete prop.extraList;

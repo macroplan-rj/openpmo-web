@@ -208,7 +208,7 @@ export class StakeholderOrganizationComponent implements OnInit {
       this.organization = organization;
       this.stakeholderRoles = null;
       this.loadStakeholderRolesCardsItems();
-      this.saveButton?.hideButton();
+      this.saveButton?.showButton();
       this.cancelButton.showButton();
     }
   }
@@ -266,12 +266,10 @@ export class StakeholderOrganizationComponent implements OnInit {
 
   handleShowSaveButton() {
     this.cancelButton.showButton();
+    // SD-10606: papel sem preenchimento nao esconde o Salvar; saveStakeholder avisa
     if (this.organization) {
-      return this.validateStakeholder()
-        ? this.saveButton?.showButton()
-        : this.saveButton?.hideButton();
+      this.saveButton?.showButton();
     }
-    return;
   }
 
   validateStakeholder() {
@@ -295,6 +293,10 @@ export class StakeholderOrganizationComponent implements OnInit {
   }
 
   async saveStakeholder() {
+    if (!this.organization || !this.validateStakeholder()) {
+      this.saveButton?.rejectSave();
+      return;
+    }
     this.cancelButton.hideButton();
     this.formIsSaving = true;
     const stakeholderModel = {

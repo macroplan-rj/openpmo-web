@@ -285,7 +285,7 @@
 
   <!-- Botões de Ação -->
   <app-buttons-container>
-    <app-save-button (save)="saveIndicator()"></app-save-button>
+    <app-save-button [form]="formIndicator" (save)="saveIndicator()"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
 </div>

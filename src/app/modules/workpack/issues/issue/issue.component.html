@@ -104,7 +104,7 @@
   </div>
  
   <app-buttons-container>
-    <app-save-button #saveButton (save)="saveIssue()"></app-save-button>
+    <app-save-button [form]="formIssue" #saveButton (save)="saveIssue()"></app-save-button>
     <app-cancel-button (cancel)="handleOnCancel()"></app-cancel-button>
   </app-buttons-container>
 </div>
