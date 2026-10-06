@@ -974,6 +974,7 @@ export class WorkpackComponent implements OnDestroy, OnInit {
             actual: actualInformation
           },
           statusProperty: workpack?.statusProperty || undefined,
+          statusOptions: workpack?.statusOptions || [],
         };
       });
       if (this.workpackSrv.getEditPermission() && !idWorkpackModelLinked) {

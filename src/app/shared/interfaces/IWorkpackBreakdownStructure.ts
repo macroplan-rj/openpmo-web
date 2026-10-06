@@ -35,6 +35,12 @@ export interface IWorkpackBreakdownStructure {
   expirationDate?: string;
   milestoneDate?: string;
   milestoneStatus?: string;
+  projectStatus?: string;
+  deliverableStatus?: string;
+  /** Opcoes da propriedade de situacao, na ordem do modelo ("Tipos de situacao"). */
+  statusOptions?: string[];
+  /** Linha de base proposta aguardando aprovacao ("Em aprovacao"). */
+  pendingBaseline?: boolean;
 
   workpackModels: IWorkpackBreakdownStructureWorkpackModel[];
 }

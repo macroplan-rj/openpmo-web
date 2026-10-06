@@ -187,6 +187,12 @@
         margin-right: 0.25em;
         font-size: 14px
       }
+
+      .pending-baseline-icon {
+        color: #F59A23;
+        margin-right: 0.35em;
+        font-size: 14px;
+      }
   
       .tree-label {
         display: flex;
@@ -208,6 +214,12 @@
 
       &.deliverable {
         width: 60%;
+      }
+
+      .deliverable-status-types {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
       }
 
       .status-container {

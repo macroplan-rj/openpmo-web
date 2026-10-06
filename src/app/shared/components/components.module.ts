@@ -42,6 +42,8 @@ import { CardJournalInformationComponent } from './card-journal-information/card
 import { CardListComponent } from './card-list/card-list.component';
 import { SearchItemCardComponent } from './search-item-card/search-item-card.component';
 import { CardSharingIndicatorsComponent } from './card-sharing-indicators/card-sharing-indicators.component';
+import { StatusTypesTooltipComponent } from './status-types-tooltip/status-types-tooltip.component';
+import { ProgressBarSummaryComponent } from './progress-bar-summary/progress-bar-summary.component';
 
 @NgModule({
   declarations: [
@@ -83,7 +85,9 @@ import { CardSharingIndicatorsComponent } from './card-sharing-indicators/card-s
     CardJournalInformationComponent,
     CardListComponent,
     SearchItemCardComponent,
-    CardSharingIndicatorsComponent
+    CardSharingIndicatorsComponent,
+    StatusTypesTooltipComponent,
+    ProgressBarSummaryComponent
   ],
   imports: [
     CommonModule,
@@ -120,7 +124,9 @@ import { CardSharingIndicatorsComponent } from './card-sharing-indicators/card-s
     CancelButtonComponent,
     CardJournalInformationComponent,
     SearchItemCardComponent,
-    CardSharingIndicatorsComponent
+    CardSharingIndicatorsComponent,
+    StatusTypesTooltipComponent,
+    ProgressBarSummaryComponent
   ]
 })
 export class ComponentsModule { }

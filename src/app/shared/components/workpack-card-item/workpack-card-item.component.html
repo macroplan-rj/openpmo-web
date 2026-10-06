@@ -194,6 +194,9 @@
               </ng-template>
               </ng-container>
             </ng-container>
+            <app-status-types-tooltip class="card-status-types" [options]="properties?.statusOptions"
+              [current]="properties?.statusProperty">
+            </app-status-types-tooltip>
           </div>
           <p-overlayPanel #journalInformationPanel class="journal-info-overlay-panel" [showCloseIcon]="true" [dismissable]="false">
             <div class="journal-info-panel-content"
@@ -291,6 +294,10 @@
                   </ng-template>
                 </ng-template>
               </ng-container>
+            </span>
+            <span class="dashboard-icon-slot" *ngIf="properties?.statusOptions?.length">
+              <app-status-types-tooltip [options]="properties.statusOptions" [current]="properties?.statusProperty">
+              </app-status-types-tooltip>
             </span>
 
             <span class="dashboard-icon-slot">

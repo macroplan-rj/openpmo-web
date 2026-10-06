@@ -36,6 +36,8 @@
             [pTooltip]="parseTooltipTranslatedStrings(shouldDisplayWarningStyles(node).textTooltipMessages)">
             <i *ngIf="shouldDisplayWarningStyles(node).displayWarningIcon"
               class="warning-icon fa fa-exclamation-triangle" aria-hidden="true"></i>
+            <i *ngIf="node?.pendingBaseline" class="pending-baseline-icon fas fa-hourglass-half"
+              [pTooltip]="'pendingApproval'|translate" aria-hidden="true"></i>
             <div class="tree-label link"
               [ngClass]="{ 'alert-text': shouldDisplayWarningStyles(node).displayColoredText, 'dashed-text': shouldDisplayWarningStyles(node).displayDashedText }"
               (click)="navigateToWorkpack(node)">
@@ -101,6 +103,10 @@
                 </ng-template>
               </ng-container>
 
+              <app-status-types-tooltip class="deliverable-status-types" [options]="node?.statusOptions"
+                [current]="node?.deliverableStatus" [showLabel]="true">
+              </app-status-types-tooltip>
+
               <div class="header-values-cost-account" *ngIf="node?.properties?.progressBars">
                 <ng-container *ngIf="shouldDisplayNewTag(node)">
                   <div class="status-container">
@@ -118,13 +124,7 @@
                     [disableLabels]="true">
                   </app-progress-bar>
                   <p-overlayPanel #progressBarPanel class="progressbar-overlay-panel">
-                    <app-progress-bar [total]="progressBar.total" [progress]="progressBar.progress"
-                      [labelTotal]="progressBar.labelTotal" [labelProgress]="progressBar.labelProgress"
-                      [valueUnit]="progressBar.valueUnit" [baselineTotal]="progressBar.baselinePlanned"
-                      [color]="progressBar.color" [startDateBaseline]="progressBar.startDateBaseline"
-                      [endDateBaseline]="progressBar.endDateBaseline" [startDateTotal]="progressBar.startDateTotal"
-                      [endDateTotal]="progressBar.endDateTotal" [barHeight]="progressBar.barHeight">
-                    </app-progress-bar>
+                    <app-progress-bar-summary [progressBar]="progressBar"></app-progress-bar-summary>
                   </p-overlayPanel>
                 </div>
               </div>
