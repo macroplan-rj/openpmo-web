@@ -455,7 +455,7 @@
       "label": "Legenda que será exibida na propriedade. Informação obrigatória.",
       "sortIndex": "Ordem em que a propriedade será exibida no pacote de trabalho. Informação obrigatória.",
       "precision": "Número de casas decimais que será utilizado nos valores da propriedade. Valor padrão é zero.",
-      "possibleValues": "Lista de opções que serão exibidas para seleção do valor da propriedade. Informação obrigatória.",
+      "possibleValues": "Lista de opções que serão exibidas para seleção do valor da propriedade. Separe as opções com ponto e vírgula (;) ou Enter; a vírgula pode fazer parte do texto da opção. Informação obrigatória.",
       "dynamicSelectionProvider": "Provedor das opções",
       "dynamicSelectionDependsOn": "Depende de",
       "dynamicSelectionHelpProvider": "Lista de onde vêm as opções (ex.: PPA — Programas).",

@@ -11,6 +11,8 @@ import { TypePropertModelEnum as TypePropertyModelEnum}  from 'src/app/shared/en
 import * as moment from 'moment';
 import { SelectItem, TreeNode } from 'primeng/api';
 import { TypeOrganization } from '../../enums/TypeOrganization';
+import { Chips } from 'primeng/chips';
+import { normalizeSelectionOptions, SELECTION_SEPARATOR } from '../../utils/selection-values';
 
 @Component({
   selector: 'app-property-model',
@@ -129,6 +131,19 @@ loadSectorOptions() {
         this.property.defaultValue = (this.property.defaultValue as any[]).shift();
       }
     }
+  }
+
+  /** SD #10628: ';' separa as opcoes (o p-chips do PrimeNG 11 so cria chip ao digitar ','). */
+  handlePossibleValuesKeydown(event: KeyboardEvent, chips: Chips) {
+    if (event.key === SELECTION_SEPARATOR) {
+      event.preventDefault();
+      chips.addItem(event, chips.inputViewChild.nativeElement.value, true);
+    }
+  }
+
+  handlePossibleValuesChange(values: string[]) {
+    this.property.possibleValuesOptions = normalizeSelectionOptions(values);
+    this.changed.emit(this.property.possibleValuesOptions);
   }
 
   checkIfRemovedValueIsDefault({ value }) {

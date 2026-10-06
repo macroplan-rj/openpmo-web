@@ -27,6 +27,7 @@ import { ICostAccountModel } from 'src/app/shared/interfaces/ICostAccountModel';
 import { IOrganization } from 'src/app/shared/interfaces/IOrganization';
 import { TypeOrganization } from 'src/app/shared/enums/TypeOrganization';
 import { CancelButtonComponent } from 'src/app/shared/components/cancel-button/cancel-button.component';
+import { joinSelectionValues, selectionArraySeparator, splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 @Component({
   selector: 'app-cost-account-model',
@@ -262,10 +263,10 @@ export class CostAccountModelComponent implements OnInit {
     const dataPropertiesAndIndex = (await Promise.all(properties
       .map(async (p, i) => {
         if (p.possibleValues) {
-          p.possibleValuesOptions = (p.possibleValues as string).split(',');
+          p.possibleValuesOptions = splitSelectionValues(p.possibleValues as string);
         }
         if (p.defaultValue && p.multipleSelection) {
-          p.defaultValue = (p.defaultValue as string).split(',');
+          p.defaultValue = splitSelectionValues(p.defaultValue as string);
         }
         if (p.idDomain) {
           p.extraList = await this.getListLocalities(p.idDomain, p.multipleSelection);
@@ -604,14 +605,14 @@ export class CostAccountModelComponent implements OnInit {
     this.modelProperties.forEach(prop => {
       delete prop.extraList;
       delete prop.extraListDefaults;
-      prop.possibleValues = prop.possibleValuesOptions && prop.possibleValuesOptions.join(',');
+      prop.possibleValues = prop.possibleValuesOptions && joinSelectionValues(prop.possibleValuesOptions);
     });
     const propertiesClone: IWorkpackModelProperty[] =
       JSON.parse(JSON.stringify([...this.modelProperties]));
     propertiesClone.map(prop => {
       Object.keys(prop).map(key => {
         if (prop[key] && prop[key] instanceof Array && key !== 'defaults') {
-          prop[key] = prop[key].map(v => typeof v == 'string' ? v.trim() : v).join(',') as string;
+          prop[key] = prop[key].map(v => typeof v == 'string' ? v.trim() : v).join(selectionArraySeparator(prop, key)) as string;
         }
         if (prop[key] && !(prop[key] instanceof Array) && key === 'defaults' && prop.type !== 'UnitSelectionModel') {
           prop[key] = [prop[key]] as number[];

@@ -16,6 +16,7 @@ import { IDomain } from '../interfaces/IDomain';
 import { ILocalityList } from '../interfaces/ILocality';
 import { TranslateService } from '@ngx-translate/core';
 import { TypeWorkpackModelEnum } from '../enums/TypeWorkpackModelEnum';
+import { splitSelectionValues } from '../utils/selection-values';
 
 @Injectable({
   providedIn: 'root'
@@ -233,8 +234,9 @@ export class WorkpackPropertyService {
     }
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel && propertyModel.multipleSelection) {
       const listValues = propertyWorkpack?.value ? propertyWorkpack?.value as string : propertyModel.defaultValue as string;
-      property.defaultValue = listValues.length > 0 ? listValues.split(',') : null;
-      property.value = listValues.length > 0 ? listValues.split(',') : null;
+      const selectedValues = splitSelectionValues(listValues);
+      property.defaultValue = selectedValues.length > 0 ? selectedValues : null;
+      property.value = selectedValues.length > 0 ? [...selectedValues] : null;
     }
 
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.DynamicSelectionModel) {
@@ -253,7 +255,7 @@ export class WorkpackPropertyService {
 
     if (this.typePropertyModel[propertyModel.type] === TypePropertyModelEnum.SelectionModel) {
       const listOptions = propertyModel.possibleValues ?
-      (propertyModel.possibleValues as string).split(',').sort((a, b) => a.localeCompare(b)) : [];
+      splitSelectionValues(propertyModel.possibleValues as string).sort((a, b) => a.localeCompare(b)) : [];
       property.possibleValues = listOptions.map(op => ({ label: op, value: op }));
     }
 

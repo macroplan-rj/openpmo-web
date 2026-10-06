@@ -445,7 +445,7 @@
       "label": "Property displayed label. Information is required.",
       "sortIndex": "The order in which the property will be displayed in workpack. Information is required.",
       "precision": "The number of decimal places to be used in property values. Default value is zero.",
-      "possibleValues": "List of options will be displayed to select in the property value. Information is required.",
+      "possibleValues": "List of options will be displayed to select in the property value. Separate the options with a semicolon (;) or Enter; a comma can be part of the option text. Information is required.",
       "dynamicSelectionProvider": "Options provider",
       "dynamicSelectionDependsOn": "Depends on",
       "dynamicSelectionHelpProvider": "List the options come from (e.g. PPA — Programs).",

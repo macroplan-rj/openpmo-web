@@ -35,6 +35,7 @@ import { MinLengthTextCustomValidator } from 'src/app/shared/utils/minLengthText
 import { TypeOrganization } from 'src/app/shared/enums/TypeOrganization';
 import { IOrganization } from 'src/app/shared/interfaces/IOrganization';
 import { CancelButtonComponent } from 'src/app/shared/components/cancel-button/cancel-button.component';
+import { joinSelectionValues, selectionArraySeparator, splitSelectionValues } from 'src/app/shared/utils/selection-values';
 
 @Component({
   selector: 'app-report-model',
@@ -410,10 +411,10 @@ export class ReportModelComponent implements OnInit, OnDestroy {
     const dataPropertiesAndIndex = (await Promise.all(properties
       .map(async(p, i) => {
         if (p.possibleValues) {
-          p.possibleValuesOptions = (p.possibleValues as string).split(',');
+          p.possibleValuesOptions = splitSelectionValues(p.possibleValues as string);
         }
         if (p.defaultValue && p.multipleSelection) {
-          p.defaultValue = (p.defaultValue as string).split(',');
+          p.defaultValue = splitSelectionValues(p.defaultValue as string);
         }
         if (p.idDomain) {
           p.extraList = await this.getListLocalities(p.idDomain, p.multipleSelection);
@@ -788,14 +789,14 @@ export class ReportModelComponent implements OnInit, OnDestroy {
     this.modelProperties.forEach(prop => {
       delete prop.extraList;
       delete prop.extraListDefaults;
-      prop.possibleValues = prop.possibleValuesOptions && prop.possibleValuesOptions.join(',');
+      prop.possibleValues = prop.possibleValuesOptions && joinSelectionValues(prop.possibleValuesOptions);
     });
     const propertiesClone: IWorkpackModelProperty[] =
       JSON.parse(JSON.stringify([...this.modelProperties]));
     propertiesClone.map(prop => {
       Object.keys(prop).map(key => {
         if (prop[key] && prop[key] instanceof Array && key !== 'defaults') {
-          prop[key] = prop[key].map(v => typeof v == 'string' ? v.trim() : v).join(',') as string;
+          prop[key] = prop[key].map(v => typeof v == 'string' ? v.trim() : v).join(selectionArraySeparator(prop, key)) as string;
         }
         if (prop[key] && !(prop[key] instanceof Array) && key === 'defaults' && prop.type !== 'UnitSelectionModel') {
           prop[key] = [prop[key]] as number[];
