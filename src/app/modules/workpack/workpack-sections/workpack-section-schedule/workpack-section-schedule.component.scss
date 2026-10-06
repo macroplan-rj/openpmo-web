@@ -68,6 +68,15 @@
           font-size: 0.8rem !important;
         }
       }
+      .button-edit {
+        margin-right: 2em;
+        width: 180px;
+        font-size: 0.8rem;
+        font-family: v.$fontFamilyMedium;
+        .p-button-label {
+          font-size: 0.8rem !important;
+        }
+      }
       .button-delete {
         width: 180px;
         background: rgba(255,106,106, 0.9);
@@ -86,10 +95,13 @@
     .schedule-buttons.schedule-buttons-mobile {
       flex-direction: column;
       width: 100%;
-      .p-button-text {
+      .p-button-text, .button-edit {
         width: 100%;
         font-size: 0.6rem ;
         margin-top: 0.5em;
+      }
+      .button-edit {
+        margin-right: 0;
       }
       .button-delete {
         margin-top: 1em;

@@ -210,6 +210,7 @@
   "hideDetails": "Hide details",
   "showDetails": "Show details",
   "deleteSchedule": "Delete schedule",
+  "editSchedule": "Edit schedule",
   "step": "Step",
   "newMonth": "New Month",
   "minLenght": "Minimun lenght",
@@ -737,6 +738,13 @@
         "has": {
           "active": {
             "baseline": "It is not possible delete because has a active baseline."
+          }
+        },
+        "update": {
+          "removes": {
+            "baseline": {
+              "step": "The schedule cannot end before a month that belongs to the baseline. Choose an end date on or after the last baseline month."
+            }
           }
         }
       },

@@ -9,7 +9,7 @@ import { Calendar } from 'primeng/calendar';
 import { MenuItem, MessageService } from 'primeng/api';
 
 import { ICard } from 'src/app/shared/interfaces/ICard';
-import { ISchedule, ICost } from 'src/app/shared/interfaces/ISchedule';
+import { ISchedule, ICost, IScheduleDetail, IScheduleUpdate } from 'src/app/shared/interfaces/ISchedule';
 import { BreadcrumbService } from 'src/app/shared/services/breadcrumb.service';
 import { ResponsiveService } from 'src/app/shared/services/responsive.service';
 import { ScheduleService } from 'src/app/shared/services/schedule.service';
@@ -59,6 +59,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   currentLang = '';
   isLoading = false;
   formIsSaving = false;
+  // SD-10605: edicao de cronograma existente (?idSchedule=)
+  idSchedule: number;
+  isEditMode = false;
+  hasBaseline = false;
+  editCostAccounts: IEditCostAccount[] = [];
 
   constructor(
     private actRouter: ActivatedRoute,
@@ -76,6 +81,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.idWorkpack = queryParams.idWorkpack;
       this.idWorkpackModelLinked = queryParams.idWorkpackModelLinked;
       this.unitMeasure = queryParams.unitMeansureName;
+      this.idSchedule = queryParams.idSchedule ? Number(queryParams.idSchedule) : undefined;
+      this.isEditMode = !!this.idSchedule;
     });
     this.currentLang = this.translateSrv.currentLang;
     this.currentLang = this.translateSrv.getDefaultLang();
@@ -95,7 +102,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       end: [newDate.add(1, 'days').toDate(), Validators.required],
       plannedWork: [null, Validators.required],
       actualWork: null,
-      distribution: ['SIGMOIDAL', Validators.required]
+      distribution: ['SIGMOIDAL', Validators.required],
+      // usados so na edicao (SD-10605)
+      baselinePlannedWork: [{ value: null, disabled: true }],
+      plannedCost: null,
+      actualCost: null,
+      baselineCost: [{ value: null, disabled: true }]
     });
   }
 
@@ -111,7 +123,158 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.yearRange = (yearStart - 10).toString() + ':' + (yearStart + 10).toString();
     this.isLoading = true;
     await this.loadPropertiesSchedule();
+    if (this.isEditMode) {
+      await this.loadScheduleForEdit();
+    }
     this.isLoading = false;
+  }
+
+  /**
+   * SD-10605: preenche o formulario com o cronograma atual. Valores atuais vem do GET /schedules/{id}
+   * (BigDecimal exato); linha de base (Estimado) vem do GET /schedules?id-workpack.
+   */
+  async loadScheduleForEdit() {
+    const [resultById, resultList] = await Promise.all([
+      this.scheduleSrv.GetScheduleById(this.idSchedule),
+      this.scheduleSrv.GetSchedule({ 'id-workpack': this.idWorkpack })
+    ]);
+    if (!resultById || !resultById.success || !resultById.data) {
+      this.navigateBackToWorkpack();
+      return;
+    }
+    const schedule = resultById.data;
+    const baselineInfo: IScheduleDetail = resultList && resultList.success && resultList.data
+      ? resultList.data.find(item => Number(item.id) === Number(this.idSchedule))
+      : undefined;
+    this.hasBaseline = !!(baselineInfo && baselineInfo.baselineStart);
+
+    this.formSchedule.reset({
+      start: moment(schedule.start).toDate(),
+      end: moment(schedule.end).toDate(),
+      plannedWork: roundValue(schedule.planed),
+      actualWork: roundValue(schedule.actual),
+      distribution: schedule.distribution || 'SIGMOIDAL',
+      baselinePlannedWork: this.hasBaseline ? roundValue(baselineInfo.baselinePlaned) : null,
+      plannedCost: null,
+      actualCost: null,
+      baselineCost: this.hasBaseline ? roundValue(baselineInfo.baselineCost) : null
+    });
+    this.formSchedule.controls.start.disable();
+    this.scheduleStartDate = this.formSchedule.controls.start.value;
+
+    this.editCostAccounts = this.sumCostsByCostAccount(schedule);
+    if (this.editCostAccounts.length === 0 && this.costAccounts && this.costAccounts.length === 1) {
+      const only = this.costAccounts[0];
+      this.editCostAccounts = [{ id: only.id, name: this.getCostAccountName(only.id), plannedCost: 0, actualCost: 0 }];
+    }
+
+    if (this.editCostAccounts.length > 1) {
+      this.cardCostAssignmentsProperties = {
+        toggleable: false,
+        initialStateToggle: false,
+        cardTitle: 'costAssignment',
+        collapseble: false,
+        initialStateCollapse: false
+      };
+      this.costAssignmentsCardItems = this.editCostAccounts.map(cost => ({
+        type: 'cost-card',
+        unitMeasureName: '$',
+        idCost: cost.id,
+        costAccountName: cost.name,
+        plannedWork: cost.plannedCost,
+        actualWork: cost.actualCost
+      }));
+      this.formSchedule.controls.plannedCost.disable();
+      this.formSchedule.controls.actualCost.disable();
+    } else {
+      this.cardCostAssignmentsProperties = undefined;
+      this.costAssignmentsCardItems = [];
+      if (this.editCostAccounts.length === 1) {
+        this.formSchedule.controls.plannedCost.setValue(this.editCostAccounts[0].plannedCost);
+        this.formSchedule.controls.actualCost.setValue(this.editCostAccounts[0].actualCost);
+      } else {
+        // sem conta de custo nao ha onde lancar $
+        this.formSchedule.controls.plannedCost.setValue(0);
+        this.formSchedule.controls.actualCost.setValue(0);
+        this.formSchedule.controls.plannedCost.disable();
+        this.formSchedule.controls.actualCost.disable();
+      }
+    }
+    this.reloadCostAssignmentTotals();
+  }
+
+  get singleCostEdit(): boolean {
+    return this.isEditMode && this.editCostAccounts.length <= 1;
+  }
+
+  sumCostsByCostAccount(schedule: IScheduleDetail): IEditCostAccount[] {
+    const byId = new Map<number, IEditCostAccount>();
+    (schedule.groupStep || []).forEach(group => (group.steps || []).forEach(step => (step.consumes || []).forEach(consume => {
+      const id = consume.costAccount && consume.costAccount.id;
+      if (!id) {
+        return;
+      }
+      const current = byId.get(id) || {
+        id,
+        name: consume.costAccount.name || this.getCostAccountName(id),
+        plannedCost: 0,
+        actualCost: 0
+      };
+      current.plannedCost = roundValue(current.plannedCost + (Number(consume.plannedCost) || 0));
+      current.actualCost = roundValue(current.actualCost + (Number(consume.actualCost) || 0));
+      byId.set(id, current);
+    })));
+    return Array.from(byId.values());
+  }
+
+  getCostAccountName(idCostAccount: number): string {
+    const costAccount = this.costAccounts && this.costAccounts.find(cost => cost.id === idCostAccount);
+    if (!costAccount || !costAccount.models || !costAccount.properties) {
+      return '';
+    }
+    const propertyModelName = costAccount.models.find(p => p.name === 'name');
+    const propertyName = propertyModelName && costAccount.properties.find(p => p.idPropertyModel === propertyModelName.id);
+    return propertyName ? propertyName.value as string : '';
+  }
+
+  navigateBackToWorkpack() {
+    this.router.navigate(
+      ['/workpack'],
+      {
+        queryParams: {
+          id: this.idWorkpack,
+          idPlan: this.idPlan,
+          idWorkpackModelLinked: this.idWorkpackModelLinked
+        }
+      }
+    );
+  }
+
+  async updateSchedule() {
+    const costs: ICost[] = this.singleCostEdit
+      ? this.editCostAccounts.map(cost => ({
+        id: cost.id,
+        plannedCost: this.formSchedule.controls.plannedCost.value || 0,
+        actualCost: this.formSchedule.controls.actualCost.value || 0
+      }))
+      : this.costAssignmentsCardItems.filter(card => card.type === 'cost-card').map(cost => ({
+        id: cost.idCost,
+        plannedCost: cost.plannedWork || 0,
+        actualCost: cost.actualWork || 0
+      }));
+    const schedule: IScheduleUpdate = {
+      end: moment(this.formSchedule.controls.end.value).format('YYYY-MM-DD'),
+      plannedWork: this.formSchedule.controls.plannedWork.value,
+      actualWork: this.formSchedule.controls.actualWork.value || 0,
+      distribution: this.formSchedule.controls.distribution.value,
+      costs
+    };
+    this.formIsSaving = true;
+    const result = await this.scheduleSrv.putSchedule(this.idSchedule, schedule);
+    this.formIsSaving = false;
+    if (result && result.success) {
+      this.navigateBackToWorkpack();
+    }
   }
 
   async setBreadcrumb() {
@@ -124,7 +287,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       {
         key: 'schedule',
         routerLink: ['/workpack/schedule'],
-        queryParams: { id: this.idWorkpack },
+        queryParams: this.isEditMode ? { idWorkpack: this.idWorkpack, idSchedule: this.idSchedule } : { id: this.idWorkpack },
         info: ''
       }
     ]);
@@ -386,6 +549,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       return;
     }
     const hasNegativeValues = this.formSchedule.controls.plannedWork.value < 0 || this.formSchedule.controls.actualWork.value < 0 ||
+      this.formSchedule.controls.plannedCost.value < 0 || this.formSchedule.controls.actualCost.value < 0 ||
       (this.costAssignmentsCardItems && this.costAssignmentsCardItems.filter( item => item.type === 'cost-card' &&
         (item.plannedWork < 0 || item.actualWork < 0)).length > 0 );
     if (hasNegativeValues) {
@@ -395,6 +559,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         summary: this.translateSrv.instant('atention')
       });
       this.saveButton.hideButton();
+      return;
+    }
+    if (this.isEditMode) {
+      await this.updateSchedule();
       return;
     }
     this.schedule = {
@@ -429,6 +597,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   handleOnCancel() {
     this.saveButton.hideButton();
+    if (this.isEditMode) {
+      this.navigateBackToWorkpack();
+      return;
+    }
     const newDate = moment();
     this.formSchedule.reset({
       start: newDate.toDate(),
@@ -446,4 +618,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.reloadCostAssignmentTotals();
   }
 
+}
+
+export interface IEditCostAccount {
+  id: number;
+  name: string;
+  plannedCost: number;
+  actualCost: number;
+}
+
+/** Soma de decimais vindos da API sem o ruido de ponto flutuante do JS. */
+function roundValue(value: number): number {
+  return Math.round((Number(value) || 0) * 1e6) / 1e6;
 }

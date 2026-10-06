@@ -2,7 +2,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Injectable, Inject, Injector } from '@angular/core';
 import { BaseService } from '../base/base.service';
 import { IHttpResult } from '../interfaces/IHttpResult';
-import { ISchedule, IScheduleDetail, IStep, IStepPost } from '../interfaces/ISchedule';
+import { ISchedule, IScheduleDetail, IScheduleUpdate, IStep, IStepPost } from '../interfaces/ISchedule';
 import { PrepareHttpParams } from '../utils/query.util';
 import { WorkpackService } from './workpack.service';
 import { IWorkpackData, IWorkpackParams } from '../interfaces/IWorkpackDataParams';
@@ -95,6 +95,10 @@ export class ScheduleService extends BaseService<any> {
 
   public postSchedule(schedule: ISchedule): Promise<IHttpResult<ISchedule>> {
     return this.http.post(`${this.urlBase}`, schedule).toPromise() as Promise<IHttpResult<ISchedule>>;
+  }
+
+  public putSchedule(id: number, schedule: IScheduleUpdate): Promise<IHttpResult<{ id: number }>> {
+    return this.http.put(`${this.urlBase}/${id}`, schedule).toPromise() as Promise<IHttpResult<{ id: number }>>;
   }
 
   public putScheduleStep(step: IStepPost): Promise<IHttpResult<IStepPost>> {

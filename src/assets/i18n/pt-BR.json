@@ -218,6 +218,7 @@
   "hideDetails": "Esconder detalhes",
   "showDetails": "Mostrar detalhes",
   "deleteSchedule": "Excluir cronograma",
+  "editSchedule": "Editar cronograma",
   "step": "Passo",
   "newMonth": "Novo Mês",
   "minLenght": "Mínimo de caracteres",
@@ -745,6 +746,13 @@
         "has": {
           "active": {
             "baseline": "Não é possível excluir um cronograma com linha de base ativa."
+          }
+        },
+        "update": {
+          "removes": {
+            "baseline": {
+              "step": "Não é possível encerrar o cronograma antes de um mês que está na linha de base. Escolha um fim igual ou posterior ao último mês da linha de base."
+            }
           }
         }
       },
