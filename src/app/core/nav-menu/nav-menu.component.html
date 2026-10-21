@@ -60,6 +60,10 @@
     [pTooltip]="'organizations' | translate">
     <i class="app-icon building" [ngStyle]="{ fontSize: '1.3rem' }"></i>
   </div>
+  <div class="item" [routerLink]="['/dynamic-selection-lists']" [queryParams]="{ idOffice: currentIDOffice }" [class.ofc-opened]="isMenuOfficeConfigurationOpen(MenuOfficeConfigurationButtons.DYNAMIC_SELECTION_LISTS)"
+    [pTooltip]="'dynamicSelectionLists' | translate">
+    <i class="fa-icon fas fa-sitemap" [ngStyle]="{ fontSize: '1.2rem' }"></i>
+  </div>
   <div class="item" [routerLink]="['/offices/permission']" [queryParams]="{ idOffice: currentIDOffice }" [class.ofc-opened]="isMenuOfficeConfigurationOpen(MenuOfficeConfigurationButtons.OFFICES_PERMISSION)"
     [pTooltip]="'officePermissions' | translate">
     <i class="app-icon permission" [ngStyle]="{ fontSize: '1.3rem' }"></i>

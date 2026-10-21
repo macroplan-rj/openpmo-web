@@ -1,0 +1,20 @@
+<div class="app-dynamic-selection-lists">
+  <div class="header-container" [class.mobile]="responsive">
+    <div class="app-content-header" [class.mobile]="responsive">
+      <span>{{ 'dynamicSelectionLists' | translate }}</span>
+    </div>
+  </div>
+  <div class="card-container">
+    <app-card [properties]="cardProperties" class="mt-0">
+      <div class="loading-container" *ngIf="isLoading">
+        <app-card-loading [isCardLoading]="isLoading"></app-card-loading>
+      </div>
+      <div class="p-grid" *ngIf="!isLoading">
+        <div class="p-col-12 p-sm-12 p-md-4 p-lg-3 card-item-container" *ngFor="let cardItem of cardItems">
+          <app-card-item [properties]="cardItem"></app-card-item>
+        </div>
+        <div class="p-col-12 empty" *ngIf="!cardItems.length">{{ 'noContent' | translate }}</div>
+      </div>
+    </app-card>
+  </div>
+</div>

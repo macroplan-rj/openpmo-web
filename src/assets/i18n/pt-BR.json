@@ -909,6 +909,22 @@
       },
       "risk": {
         "has-issue-relationship": "Não é possível excluir o risco pois está associado a uma ocorrência."
+      },
+      "dynamicSelection": {
+        "list": {
+          "notFound": "Lista de seleção não encontrada: {{0}}."
+        },
+        "item": {
+          "notFound": "Item não encontrado: {{0}}.",
+          "codeRequired": "Informe o código do item.",
+          "labelRequired": "Informe a descrição do item.",
+          "duplicatedCode": "Já existe um item com o código {{0}} nesta lista.",
+          "parentRequired": "Selecione o item-pai.",
+          "parentNotFound": "Item-pai não encontrado: {{0}}.",
+          "parentNotAllowed": "Esta lista não tem item-pai.",
+          "isParent": "O item {{0}} tem itens vinculados em outra lista e não pode ser excluído.",
+          "inUse": "O item {{0}} já está preenchido em alguma ficha e não pode ser excluído."
+        }
       }
     },
     "obligationNotFound": "Nota de obrigação não encontrada",
@@ -1179,5 +1195,9 @@
   "grantorBeneficiaryName": "Nome Concedente / Convenente",
   "contract": "Contrato",
   "newContract": "Novo Contrato",
-  "supplier": "Fornecedor"
+  "supplier": "Fornecedor",
+  "dynamicSelectionLists": "Listas de seleção",
+  "dynamicSelectionItemsCount": "{{count}} itens",
+  "dynamicSelectionNewItem": "Novo item",
+  "dynamicSelectionCode": "Código"
 }

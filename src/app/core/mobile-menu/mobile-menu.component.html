@@ -181,6 +181,13 @@
       </span>
       <span class="menu-label">{{ 'organizations' | translate }}</span>
     </div>
+    <div class="item" (click)="closeAllMenus()" [routerLink]="['/dynamic-selection-lists']"
+      [queryParams]="{ idOffice: currentIDOffice }">
+      <span class="icon-wrapper">
+        <i class="fas fa-sitemap" [ngStyle]="{ fontSize: '1.5rem' }"></i>
+      </span>
+      <span class="menu-label">{{ 'dynamicSelectionLists' | translate }}</span>
+    </div>
     <div class="item" (click)="closeAllMenus()" [routerLink]="['/domains']"
       [queryParams]="{ idOffice: currentIDOffice }">
       <span class="icon-wrapper">

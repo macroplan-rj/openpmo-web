@@ -1,0 +1,31 @@
+.app-dynamic-selection-lists {
+  width: 100%;
+
+  .loading-container {
+    position: relative;
+    min-height: 150px;
+  }
+
+  .header-container {
+    display: flex;
+    flex-direction: row;
+  }
+  .app-content-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    flex: 1;
+    span {
+      text-transform: uppercase;
+    }
+  }
+  .header-container.mobile {
+    flex-direction: column;
+  }
+  .mobile {
+    width: 100%;
+  }
+  .empty {
+    padding: 1rem;
+  }
+}
