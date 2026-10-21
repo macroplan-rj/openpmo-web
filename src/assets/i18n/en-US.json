@@ -878,6 +878,22 @@
       },
       "risk": {
         "has-issue-relationship": "This risk can not be deleted because it has a related issue."
+      },
+      "dynamicSelection": {
+        "list": {
+          "notFound": "Selection list not found: {{0}}."
+        },
+        "item": {
+          "notFound": "Item not found: {{0}}.",
+          "codeRequired": "Enter the item code.",
+          "labelRequired": "Enter the item description.",
+          "duplicatedCode": "An item with code {{0}} already exists in this list.",
+          "parentRequired": "Select the parent item.",
+          "parentNotFound": "Parent item not found: {{0}}.",
+          "parentNotAllowed": "This list has no parent item.",
+          "isParent": "Item {{0}} has linked items in another list and cannot be deleted.",
+          "inUse": "Item {{0}} is already filled in a form and cannot be deleted."
+        }
       }
     },
     "obligationNotFound": "Obligation note not found",
@@ -1142,5 +1158,9 @@
   "grantorBeneficiaryName": "Grantor / Beneficiary Name",
   "contract": "Contract",
   "newContract": "New Contract",
-  "supplier": "Supplier"
+  "supplier": "Supplier",
+  "dynamicSelectionLists": "Selection lists",
+  "dynamicSelectionItemsCount": "{{count}} items",
+  "dynamicSelectionNewItem": "New item",
+  "dynamicSelectionCode": "Code"
 }

@@ -66,6 +66,11 @@ const routes: Routes = [
     loadChildren: () => import('./modules/organization/organization.module').then(m => m.OrganizationModule)
   },
   {
+    path: 'dynamic-selection-lists',
+    canActivate: [ AuthGuard ],
+    loadChildren: () => import('./modules/dynamic-selection-list/dynamic-selection-list.module').then(m => m.DynamicSelectionListModule)
+  },
+  {
     path: 'measure-units',
     canActivate: [ AuthGuard ],
     loadChildren: () => import('./modules/measure-unit/measure-unit.module').then(m => m.MeasureUnitModule)

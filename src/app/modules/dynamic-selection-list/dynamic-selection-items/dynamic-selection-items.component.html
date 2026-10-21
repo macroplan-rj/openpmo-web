@@ -1,0 +1,74 @@
+<div class="app-dynamic-selection-items">
+  <div class="header-container" [class.mobile]="responsive">
+    <div class="app-content-header" [class.mobile]="responsive">
+      <span>{{ list?.label }}</span>
+    </div>
+  </div>
+  <div class="card-container">
+    <app-card [properties]="{ toggleable: false, initialStateToggle: false, cardTitle: '', collapseble: false, initialStateCollapse: false }" class="mt-0">
+      <div class="loading-container" *ngIf="isLoading">
+        <app-card-loading [isCardLoading]="isLoading"></app-card-loading>
+      </div>
+      <ng-container *ngIf="!isLoading && list">
+        <div class="toolbar" [class.mobile]="responsive">
+          <span class="p-input-icon-left search">
+            <i class="pi pi-search"></i>
+            <input type="text" pInputText [(ngModel)]="term" [placeholder]="'search' | translate">
+          </span>
+          <button type="button" pButton icon="pi pi-plus" iconPos="left" class="p-button-outlined"
+            [label]="'dynamicSelectionNewItem' | translate" [disabled]="!editPermission || showForm" (click)="handleNew()"></button>
+        </div>
+
+        <form class="item-form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="handleSave()">
+          <div class="p-grid">
+            <span class="p-float-label p-col-12 p-md-2">
+              <input id="dsCode" type="text" pInputText formControlName="code" maxlength="40">
+              <label for="dsCode">{{ 'dynamicSelectionCode' | translate }} *</label>
+            </span>
+            <span class="p-float-label" [ngClass]="parentList ? 'p-col-12 p-md-5' : 'p-col-12 p-md-10'">
+              <input id="dsLabel" type="text" pInputText formControlName="label">
+              <label for="dsLabel">{{ 'description' | translate }} *</label>
+            </span>
+            <span class="p-float-label p-col-12 p-md-5" *ngIf="parentList">
+              <p-dropdown inputId="dsParent" formControlName="parentCode" [options]="parentOptions" [filter]="true"
+                filterBy="label" [showClear]="true" appendTo="body" [placeholder]="' '"></p-dropdown>
+              <label for="dsParent">{{ parentList.label }} *</label>
+            </span>
+          </div>
+          <div class="form-buttons">
+            <button type="button" pButton class="p-button-outlined" [label]="'cancel' | translate" (click)="handleCancel()"></button>
+            <button type="submit" pButton [label]="'save' | translate" [disabled]="form.invalid || isSaving"></button>
+          </div>
+        </form>
+
+        <p-table [value]="filteredItems" [paginator]="true" [rows]="20" [rowsPerPageOptions]="[20, 50, 100]"
+          sortField="label" [sortOrder]="1" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="code" class="col-code">{{ 'dynamicSelectionCode' | translate }} <p-sortIcon field="code"></p-sortIcon></th>
+              <th pSortableColumn="label">{{ 'description' | translate }} <p-sortIcon field="label"></p-sortIcon></th>
+              <th *ngIf="parentList">{{ parentList.label }}</th>
+              <th class="col-actions"></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-item>
+            <tr [class.editing]="item.code === editingCode">
+              <td class="col-code">{{ item.code }}</td>
+              <td>{{ item.label }}</td>
+              <td *ngIf="parentList">{{ parentLabels[item.parentCode] || item.parentCode }}</td>
+              <td class="col-actions">
+                <button type="button" pButton icon="pi pi-pencil" class="p-button-text p-button-sm"
+                  [pTooltip]="'edit' | translate" [disabled]="!editPermission" (click)="handleEdit(item)"></button>
+                <button type="button" pButton icon="fas fa-trash-alt" class="p-button-text p-button-sm p-button-danger"
+                  [pTooltip]="'delete' | translate" [disabled]="!editPermission" (click)="handleDelete(item)"></button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td [attr.colspan]="parentList ? 4 : 3">{{ 'noContent' | translate }}</td></tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+    </app-card>
+  </div>
+</div>

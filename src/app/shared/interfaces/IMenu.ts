@@ -21,6 +21,7 @@ export enum MenuAdminButtons {
 
 export enum MenuOfficeConfigurationButtons {
   ORGANIZATIONS = 'organizations',
+  DYNAMIC_SELECTION_LISTS = 'dynamic-selection-lists',
   OFFICES_PERMISSION = 'offices/permission',
   PERSONS = 'persons'
 }

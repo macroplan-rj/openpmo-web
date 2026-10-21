@@ -56,6 +56,7 @@ export class NavMenuComponent implements OnInit, OnDestroy {
 
   menusOfficeConfiguration: IMenuOfficeConfiguration[] = [
     { label: MenuOfficeConfigurationButtons.ORGANIZATIONS, isOpen: false },
+    { label: MenuOfficeConfigurationButtons.DYNAMIC_SELECTION_LISTS, isOpen: false },
     { label: MenuOfficeConfigurationButtons.OFFICES_PERMISSION, isOpen: false },
     { label: MenuOfficeConfigurationButtons.PERSONS, isOpen: false },
   ];
