@@ -18,7 +18,7 @@
       </div>
       <p-dataView [value]="cardItemsProperties" layout="grid" class="app-dataview"
       *ngIf="(displayModeAll === 'grid' || (displayModeAll === 'list' && !!responsive)) && !isLoading"
-      [paginator]="true" [rows]="pageSize" [showJumpToPageDropdown]="true" [showPageLinks]="false"
+      [paginator]="true" [rows]="pageSize" [first]="first" (onPage)="first = $event.first" [showJumpToPageDropdown]="true" [showPageLinks]="false"
       [totalRecords]="totalRecords"
       [emptyMessage]="((editPermission === undefined || editPermission) ? 'loadingEllipsis' : 'noContent') | translate">
       <ng-template let-cardItem pTemplate="gridItem">
@@ -79,7 +79,7 @@
     </p-dataView>
     <p-dataView [value]="cardItemsProperties" layout="list"
       *ngIf="(displayModeAll === 'list' && !responsive) && !isLoading" class="app-dataview app-dataview-list"
-      [paginator]="true" [rows]="pageSize" [showJumpToPageDropdown]="true" [showPageLinks]="false"
+      [paginator]="true" [rows]="pageSize" [first]="first" (onPage)="first = $event.first" [showJumpToPageDropdown]="true" [showPageLinks]="false"
       [totalRecords]="totalRecords"
       [emptyMessage]="((editPermission === undefined || editPermission) ? 'loadingEllipsis' : 'noContent') | translate">
       <ng-template let-cardItem pTemplate="listItem">
