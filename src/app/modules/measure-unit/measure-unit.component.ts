@@ -47,6 +47,8 @@ export class MeasureUnitComponent implements OnInit {
   validatorsPrecision = [Validators.required, Validators.min(0), Validators.max(5)];
   displayModeAll = 'grid';
   pageSize = 5;
+  // indice do primeiro item da pagina atual (paginador do p-dataView)
+  first = 0;
   totalRecords: number;
   idFilterSelected: number;
   cardProperties: ICard;
@@ -294,14 +296,15 @@ export class MeasureUnitComponent implements OnInit {
     );
   }
 
+  // SD #10720: o cartao novo entra no topo e a lista volta para a pagina 1. Antes ia para o fim da
+  // lista (ultima pagina) e, com 5 por pagina, quem estava na pagina 1 nao via nada ao clicar no '+'.
   handleAddCardItem() {
-    const lastCardItemRemove = this.cardItemsProperties.pop();
     const nextNewId = this.cardItemsProperties
       .filter(a => a.newId?.startsWith('local-'))
       .map(a => +a.newId.split('-')[1])
       .reduce((a, b) => a < b ? b : a, 0) + 1;
     const newId = `local-${nextNewId}`;
-    this.cardItemsProperties.push({
+    this.cardItemsProperties.unshift({
       typeCardItem: 'listItem',
       icon: IconsEnum.UnitSelection,
       newId,
@@ -315,8 +318,9 @@ export class MeasureUnitComponent implements OnInit {
       ],
     });
     this.newForm(newId);
-    this.cardItemsProperties.push(lastCardItemRemove);
     this.cardItemsProperties = Array.from([...this.cardItemsProperties]);
+    this.totalRecords = this.cardItemsProperties.length;
+    this.first = 0;
   }
 
   newForm(newId) {
@@ -338,14 +342,13 @@ export class MeasureUnitComponent implements OnInit {
   deleteCardItem(indexCard: string) {
     const indexOnList = this.cardItemsProperties.findIndex(item => item.newId === indexCard);
     this.cardItemsProperties.splice(indexOnList, 1);
-    this.deleteForm(indexOnList);
+    this.cardItemsProperties = Array.from([...this.cardItemsProperties]);
+    this.totalRecords = this.cardItemsProperties.length;
+    // pelo id: com o cartao novo no topo, a posicao do cartao nao e mais a posicao do formulario
+    this.formsMeasureUnits = this.formsMeasureUnits.filter(item => item.id !== indexCard);
     if (!this.cardItemsProperties.filter(a => a.newId).length) {
       this.saveButton?.hideButton();
     }
-  }
-
-  deleteForm(index: number) {
-    this.formsMeasureUnits.splice(index, 1);
   }
 
   getFormById(id) {
