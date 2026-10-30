@@ -295,8 +295,8 @@
                 </ng-template>
               </ng-container>
             </span>
-            <span class="dashboard-icon-slot" *ngIf="properties?.statusOptions?.length">
-              <app-status-types-tooltip [options]="properties.statusOptions" [current]="properties?.statusProperty">
+            <span class="dashboard-icon-slot dashboard-status-slot" *ngIf="properties?.statusOptions?.length">
+              <app-status-types-tooltip [options]="properties.statusOptions" [current]="properties?.statusProperty" [showLabel]="true">
               </app-status-types-tooltip>
             </span>
 
