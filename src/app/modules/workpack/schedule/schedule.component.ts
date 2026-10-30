@@ -159,7 +159,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       actualCost: null,
       baselineCost: this.hasBaseline ? roundValue(baselineInfo.baselineCost) : null
     });
-    this.formSchedule.controls.start.disable();
+    // SD #10605: o inicio so fica bloqueado com linha de base
+    if (this.hasBaseline) {
+      this.formSchedule.controls.start.disable();
+    }
     this.scheduleStartDate = this.formSchedule.controls.start.value;
 
     this.editCostAccounts = this.sumCostsByCostAccount(schedule);
@@ -263,6 +266,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         actualCost: cost.actualWork || 0
       }));
     const schedule: IScheduleUpdate = {
+      ...(this.hasBaseline ? {} : { start: moment(this.formSchedule.controls.start.value).format('YYYY-MM-DD') }),
       end: moment(this.formSchedule.controls.end.value).format('YYYY-MM-DD'),
       plannedWork: this.formSchedule.controls.plannedWork.value,
       actualWork: this.formSchedule.controls.actualWork.value || 0,

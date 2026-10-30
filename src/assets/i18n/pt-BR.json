@@ -759,6 +759,11 @@
             "baseline": {
               "step": "Não é possível encerrar o cronograma antes de um mês que está na linha de base. Escolha um fim igual ou posterior ao último mês da linha de base."
             }
+          },
+          "start": {
+            "has": {
+              "baseline": "Não é possível alterar o início de um cronograma com linha de base."
+            }
           }
         }
       },

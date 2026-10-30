@@ -118,6 +118,19 @@ describe('ScheduleComponent - editar cronograma (SD #10605)', () => {
     expect(component.formSchedule.controls.plannedWork.value).toBe(120);
   });
 
+  it('sem linha de base deixa editar o inicio e o envia ao salvar', async () => {
+    scheduleSrv.GetSchedule.and.returnValue(Promise.resolve({ success: true, data: [{ id: 31 }] }));
+    const component = build({ idWorkpack: 10, idSchedule: 31, unitMeansureName: 'Un' });
+    await component.ngOnInit();
+
+    expect(component.formSchedule.controls.start.enabled).toBeTrue();
+    component.formSchedule.controls.start.setValue(new Date(2026, 3, 1));
+
+    await component.saveSchedule();
+
+    expect(scheduleSrv.putSchedule.calls.mostRecent().args[1].start).toBe('2026-04-01');
+  });
+
   it('salvar chama putSchedule com fim, totais, distribuicao e o $ na conta unica, e volta para a entrega', async () => {
     const component = build({ idWorkpack: 10, idSchedule: 31, unitMeansureName: 'Un' });
     await component.ngOnInit();

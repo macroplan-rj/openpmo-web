@@ -10,6 +10,7 @@ export interface ISchedule {
 }
 
 export interface IScheduleUpdate {
+  start?: Date | string;
   end: Date | string;
   plannedWork: number;
   actualWork: number;
