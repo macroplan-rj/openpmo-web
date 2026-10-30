@@ -1132,7 +1132,16 @@ html[data-theme='pb'] {
     .dashboard-status-container {
       flex: 0 0 auto !important;
       width: auto !important;
-      min-width: 440px;
+      min-width: 370px;
+
+      .dashboard-icon-slot {
+        flex-basis: 28px;
+        width: 28px;
+      }
+      // o primeiro espaco era do icone de status, que nao existe mais neste tema
+      .dashboard-icon-slot:first-child {
+        display: none;
+      }
     }
   }
   @media (max-width: 991px) {
