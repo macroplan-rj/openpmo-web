@@ -1167,5 +1167,9 @@
   "dynamicSelectionLists": "Selection lists",
   "dynamicSelectionItemsCount": "{{count}} items",
   "dynamicSelectionNewItem": "New item",
-  "dynamicSelectionCode": "Code"
+  "dynamicSelectionCode": "Code",
+  "dynamicSelectionProvider": "Options list",
+  "dynamicSelectionHelpProvider": "List that supplies the options of this field. It cannot be changed after saving.",
+  "dynamicSelectionDependsOn": "Depends on",
+  "dynamicSelectionHelpDependsOn": "Another dynamic selection field of this model. When its value changes, the options of this field are filtered."
 }
