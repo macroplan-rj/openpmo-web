@@ -886,7 +886,10 @@
       },
       "dynamicSelection": {
         "list": {
-          "notFound": "Selection list not found: {{0}}."
+          "notFound": "Selection list not found: {{0}}.",
+          "labelRequired": "Enter the list name.",
+          "duplicatedLabel": "A list named {{0}} already exists.",
+          "parentNotFound": "Parent list not found: {{0}}."
         },
         "item": {
           "notFound": "Item not found: {{0}}.",
@@ -1171,5 +1174,6 @@
   "dynamicSelectionProvider": "Options list",
   "dynamicSelectionHelpProvider": "List that supplies the options of this field. It cannot be changed after saving.",
   "dynamicSelectionDependsOn": "Depends on",
-  "dynamicSelectionHelpDependsOn": "Another dynamic selection field of this model. When its value changes, the options of this field are filtered."
+  "dynamicSelectionHelpDependsOn": "Another dynamic selection field of this model. When its value changes, the options of this field are filtered.",
+  "dynamicSelectionListName": "List name"
 }

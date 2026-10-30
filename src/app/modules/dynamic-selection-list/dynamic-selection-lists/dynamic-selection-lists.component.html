@@ -5,7 +5,24 @@
     </div>
   </div>
   <div class="card-container">
-    <app-card [properties]="cardProperties" class="mt-0">
+    <app-card [properties]="cardProperties" class="mt-0" (createNewElement)="handleNewList()">
+      <form class="list-form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="handleSave()">
+        <div class="p-grid">
+          <span class="p-float-label p-col-12 p-md-6">
+            <input id="dsListLabel" type="text" pInputText formControlName="label" maxlength="80">
+            <label for="dsListLabel">{{ 'dynamicSelectionListName' | translate }} *</label>
+          </span>
+          <span class="p-float-label p-col-12 p-md-6">
+            <p-dropdown inputId="dsListParent" formControlName="dependsOnKey" [options]="parentOptions" [showClear]="true"
+              [autoDisplayFirst]="false" appendTo="body"></p-dropdown>
+            <label for="dsListParent">{{ 'dynamicSelectionDependsOn' | translate }}</label>
+          </span>
+        </div>
+        <div class="form-buttons">
+          <button type="button" pButton class="p-button-outlined" [label]="'cancel' | translate" (click)="handleCancel()"></button>
+          <button type="submit" pButton [label]="'save' | translate" [disabled]="form.invalid || isSaving"></button>
+        </div>
+      </form>
       <div class="loading-container" *ngIf="isLoading">
         <app-card-loading [isCardLoading]="isLoading"></app-card-loading>
       </div>

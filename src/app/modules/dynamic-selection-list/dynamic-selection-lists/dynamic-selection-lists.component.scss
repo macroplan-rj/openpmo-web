@@ -25,6 +25,18 @@
   .mobile {
     width: 100%;
   }
+  .list-form {
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+    input, ::ng-deep .p-dropdown {
+      width: 100%;
+    }
+    .form-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+    }
+  }
   .empty {
     padding: 1rem;
   }
