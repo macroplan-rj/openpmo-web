@@ -751,6 +751,11 @@
             "baseline": {
               "step": "The schedule cannot end before a month that belongs to the baseline. Choose an end date on or after the last baseline month."
             }
+          },
+          "start": {
+            "has": {
+              "baseline": "The start of a schedule with a baseline cannot be changed."
+            }
           }
         }
       },
