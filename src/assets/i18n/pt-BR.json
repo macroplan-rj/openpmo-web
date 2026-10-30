@@ -1212,5 +1212,6 @@
   "dynamicSelectionHelpProvider": "Lista de onde vêm as opções deste campo. Não pode ser alterada depois de salva.",
   "dynamicSelectionDependsOn": "Depende de",
   "dynamicSelectionHelpDependsOn": "Outro campo de seleção dinâmica deste modelo. Ao mudar o valor dele, as opções deste campo são filtradas.",
-  "dynamicSelectionListName": "Nome da lista"
+  "dynamicSelectionListName": "Nome da lista",
+  "dynamicSelectionNewList": "Nova lista"
 }

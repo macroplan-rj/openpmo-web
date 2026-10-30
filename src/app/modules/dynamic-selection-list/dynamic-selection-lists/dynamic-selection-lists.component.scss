@@ -25,6 +25,11 @@
   .mobile {
     width: 100%;
   }
+  .list-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
   .list-form {
     margin-bottom: 1.5rem;
     padding-top: 1rem;

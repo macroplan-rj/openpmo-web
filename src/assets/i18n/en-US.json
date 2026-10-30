@@ -1175,5 +1175,6 @@
   "dynamicSelectionHelpProvider": "List that supplies the options of this field. It cannot be changed after saving.",
   "dynamicSelectionDependsOn": "Depends on",
   "dynamicSelectionHelpDependsOn": "Another dynamic selection field of this model. When its value changes, the options of this field are filtered.",
-  "dynamicSelectionListName": "List name"
+  "dynamicSelectionListName": "List name",
+  "dynamicSelectionNewList": "New list"
 }

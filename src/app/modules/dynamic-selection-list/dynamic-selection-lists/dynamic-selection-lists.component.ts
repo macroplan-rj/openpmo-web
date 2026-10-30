@@ -31,8 +31,7 @@ export class DynamicSelectionListsComponent implements OnInit, OnDestroy {
     initialStateToggle: false,
     cardTitle: '',
     collapseble: true,
-    initialStateCollapse: false,
-    showCreateNemElementButton: true
+    initialStateCollapse: false
   };
   showForm = false;
   isSaving = false;
