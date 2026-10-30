@@ -67,6 +67,11 @@ export class DynamicSelectionService {
     return this.http.get<any>(`${this.baseUrl}/lists`).pipe(map(res => (res && res.data) || [])).toPromise();
   }
 
+  createList(idOffice: number, list: { label: string; dependsOnKey?: string }): Promise<IDynamicSelectionList> {
+    return this.http.post<any>(`${this.baseUrl}/lists`, list,
+      { params: new HttpParams().set('id-office', String(idOffice)) }).pipe(map(res => res && res.data)).toPromise();
+  }
+
   items(listKey: string): Promise<IDynamicSelectionItem[]> {
     return this.http.get<any>(`${this.baseUrl}/lists/${encodeURIComponent(listKey)}/items`)
       .pipe(map(res => (res && res.data) || [])).toPromise();
