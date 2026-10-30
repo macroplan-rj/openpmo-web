@@ -174,7 +174,8 @@ export class WorkpackSectionIssuesComponent implements OnInit, OnDestroy {
       return { icon: null, iconSvg: false };
     }
     return {
-      icon: escolhido.className,
+      // issue-icon: gancho para a escala de azul do tema pb (styles.scss)
+      icon: `${escolhido.className} issue-icon`,
       iconSvg: escolhido.family === 'app-icon'
     };
   }

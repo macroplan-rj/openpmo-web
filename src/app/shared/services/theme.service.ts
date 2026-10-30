@@ -13,6 +13,8 @@ export class ThemeService {
   constructor(private injector: Injector) {
     const appConfig = this.injector.get(APP_CONFIG);
     this.theme = resolveTheme(appConfig.theme);
+    // Regras visuais de um tema so ficam em styles.scss, sob html[data-theme='...']
+    document.documentElement.setAttribute('data-theme', this.theme.name);
   }
 
 }

@@ -1101,3 +1101,93 @@ app-root p-toast .p-toast {
     content: "\e95f";
   }
 }
+
+// O status por extenso nas linhas da aba Entregas e so do tema pb (SD #10604).
+html:not([data-theme='pb']) .dashboard-status-slot .status-types-label {
+  display: none;
+}
+
+// SD #10604 — telas do Figma do SIPGR (Dj1tzgpjUV6EbYVOehPVmP). So no tema pb: o tema es e usado por
+// outros clientes e nao muda de aparencia.
+html[data-theme='pb'] {
+  // Risco: bandeira no lugar do fantasma (glifo da fonte propria).
+  .app-icon.risk:before {
+    font-family: 'Font Awesome 5 Free' !important;
+    font-weight: 900;
+    content: "\f024";
+  }
+
+  // Status: sem icone na frente; a frase fica na aba Entregas.
+  .img-status-icon,
+  .i-status-icon {
+    display: none !important;
+  }
+  .dashboard-status-slot {
+    flex: 0 1 auto !important;
+    width: auto !important;
+    white-space: nowrap;
+  }
+
+  // Ocorrencias em escala de azul, da importancia alta para a baixa.
+  .issue-icon.risk-red {
+    color: #1f3864 !important;
+  }
+  .issue-icon.risk-orange {
+    color: #2e75b6 !important;
+  }
+  .issue-icon.risk-yellow {
+    color: #9dc3e6 !important;
+  }
+
+  // Barras: finas e arredondadas, realizado em azul sobre trilha cinza; vermelho quando o realizado passa do total.
+  .app-progress {
+    .unit-container span,
+    .unit-container i {
+      color: #5f6b7a !important;
+    }
+    .labels .header-label:first-child,
+    .values .value:first-child {
+      color: #0b7fc1 !important;
+    }
+    .progress-bar-total-container {
+      border: none !important;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #e3e6ea !important;
+    }
+    .progress-bar {
+      height: 8px !important;
+      border-radius: 4px;
+      background: #0b7fc1 !important;
+    }
+    .progress-bar-progress-container {
+      height: 8px !important;
+      border-radius: 4px;
+      background: #d93025 !important;
+    }
+    .total-bar {
+      border: none !important;
+    }
+    .progress-bar-baseline {
+      border-radius: 2px;
+    }
+  }
+
+  .app-progress-bar-schedule-year {
+    .unit-container span,
+    .unit-container i {
+      color: #5f6b7a !important;
+    }
+    .labels .header-label:first-child,
+    .values .value:first-child {
+      color: #0b7fc1 !important;
+    }
+    .progress-bar {
+      border-radius: 2px;
+      background: #0b7fc1 !important;
+    }
+    .progress-bar + .progress-bar {
+      background: #e3e6ea !important;
+    }
+  }
+}

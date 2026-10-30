@@ -76,7 +76,6 @@
         <span class="p-float-label property-selection p-field">
           <p-dropdown class="app-single-selection" [options]="property.dependsOnOptions" [(ngModel)]="property.dependsOn"
             [showClear]="true" [autoDisplayFirst]="false" dropdownIcon="fas fa-caret-down"
-            [placeholder]="'dynamicSelectionNoParent' | translate"
             (ngModelChange)="changed.emit($event)" [disabled]="property.viewOnly"></p-dropdown>
           <label class="input-label">{{ 'dynamicSelectionDependsOn' | translate }}
             <i class="far fa-question-circle" [pTooltip]="'dynamicSelectionHelpDependsOn' | translate"></i>
