@@ -1127,6 +1127,19 @@ html[data-theme='pb'] {
     width: auto !important;
     white-space: nowrap;
   }
+  // A frase nao cabe nos 144px do bloco: abre espaco antes da barra e da data; sem espaco, fica so o (i).
+  @media (min-width: 992px) {
+    .dashboard-status-container {
+      flex: 0 0 auto !important;
+      width: auto !important;
+      min-width: 440px;
+    }
+  }
+  @media (max-width: 991px) {
+    .dashboard-status-slot .status-types-label {
+      display: none;
+    }
+  }
 
   // Ocorrencias em escala de azul, da importancia alta para a baixa.
   .issue-icon.risk-red {
@@ -1171,6 +1184,14 @@ html[data-theme='pb'] {
     .progress-bar-baseline {
       border-radius: 2px;
     }
+  }
+
+  // Cards de mes do cronograma: laranja e verde viram azul; os demais tons (Plan., Rep.) ja sao cinza e azul.
+  .app-progress-card-step .progress-bar[style*="236, 125, 49"],
+  .app-progress-card-step .progress-bar[style*="255, 140, 0"],
+  .app-progress-card-step .progress-bar[style*="108, 211, 189"],
+  .app-progress-card-step .progress-bar[style*="68, 179, 155"] {
+    background: #0b7fc1 !important;
   }
 
   .app-progress-bar-schedule-year {

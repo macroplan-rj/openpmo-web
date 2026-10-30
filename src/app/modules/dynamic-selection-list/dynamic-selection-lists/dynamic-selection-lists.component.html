@@ -5,7 +5,11 @@
     </div>
   </div>
   <div class="card-container">
-    <app-card [properties]="cardProperties" class="mt-0" (createNewElement)="handleNewList()">
+    <app-card [properties]="cardProperties" class="mt-0">
+      <div class="list-toolbar" *ngIf="!showForm">
+        <button type="button" pButton icon="pi pi-plus" iconPos="left" class="p-button-outlined"
+          [label]="'dynamicSelectionNewList' | translate" (click)="handleNewList()"></button>
+      </div>
       <form class="list-form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="handleSave()">
         <div class="p-grid">
           <span class="p-float-label p-col-12 p-md-6">
