@@ -1,5 +1,5 @@
 <span class="app-status-types" *ngIf="(showLabel && current) || hasOptions">
-  <span class="status-types-label" *ngIf="showLabel && current">
+  <span class="status-types-label" *ngIf="showLabel && current" [title]="('statusTypesLabel' | translate) + ': ' + current">
     {{ 'statusTypesLabel' | translate }}: <span class="status-types-current">{{ current }}</span>
   </span>
   <i *ngIf="hasOptions" class="pi pi-info-circle status-types-icon"
