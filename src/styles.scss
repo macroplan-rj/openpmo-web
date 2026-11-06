@@ -1127,26 +1127,27 @@ html[data-theme='pb'] {
     width: auto !important;
     white-space: nowrap;
   }
-  // A frase do status ocupa o espaco que sobrar e encolhe com reticencias (texto inteiro no title);
-  // a barra e a data nunca sao empurradas para fora da linha. Sem espaco, fica so o (i).
+  // A frase do status ganha uma coluna fixa de 240px (eram 144px), com reticencias e o texto inteiro no
+  // title; a barra de marcos e a data mantem a largura e nao saem da linha. Sem espaco, fica so o (i).
   @media (min-width: 992px) {
     .right-container {
-      width: 55% !important;
-      min-width: 0;
-    }
-    .dashboard-items-container {
-      min-width: 0;
-      // barra e data mantem o tamanho; so o status encolhe
-      > :not(.dashboard-status-container) {
-        flex: 0 0 auto;
-      }
+      width: 46% !important;
     }
     .dashboard-status-container {
-      flex: 1 1 auto !important;
-      width: auto !important;
-      min-width: 0;
+      flex: 0 0 240px !important;
+      width: 240px !important;
+      min-width: 240px;
+      max-width: 240px;
       overflow: hidden;
 
+      .dashboard-icon-slot:not(.dashboard-status-slot) {
+        flex: 0 0 28px !important;
+        width: 28px !important;
+      }
+      // o primeiro espaco era do icone de status, que nao existe mais neste tema
+      .dashboard-icon-slot:first-child {
+        display: none !important;
+      }
       .dashboard-status-slot {
         flex: 1 1 auto !important;
         min-width: 0;
@@ -1167,15 +1168,6 @@ html[data-theme='pb'] {
       }
       .status-types-icon {
         flex: 0 0 auto;
-      }
-
-      .dashboard-icon-slot:not(.dashboard-status-slot) {
-        flex: 0 0 28px !important;
-        width: 28px !important;
-      }
-      // o primeiro espaco era do icone de status, que nao existe mais neste tema
-      .dashboard-icon-slot:first-child {
-        display: none !important;
       }
     }
   }
