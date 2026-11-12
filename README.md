@@ -1,5 +1,35 @@
 # openpmo-web
 
+## Desenvolvendo o front localmente
+
+O ambiente local (Neo4j com dados, Keycloak, API e este front) sobe pelo docker compose que fica no
+repositório **openpmo-api**. Clone os dois lado a lado e siga o guia
+[openpmo-api/docker/README.md](https://github.com/macroplan-rj/openpmo-api/blob/develop/docker/README.md):
+
+```bash
+git clone -b develop https://github.com/macroplan-rj/openpmo-api.git
+git clone -b develop https://github.com/macroplan-rj/openpmo-web.git
+cd openpmo-api && docker compose up -d --build
+```
+
+Para programar o front com **atualização automática** (sem instalar Node na máquina):
+
+```bash
+cd openpmo-api
+docker compose --profile dev up -d web-dev
+docker compose logs -f web-dev      # espere "Compiled successfully"
+```
+
+Abra http://localhost:4300 e entre com o usuário `admin` e a senha `openpmo`. Ao salvar qualquer arquivo em
+`openpmo-web/src/`, a página recarrega sozinha. Requer **6 GB de memória no Docker**.
+
+| Tarefa | Como |
+|---|---|
+| Ver a versão compilada (igual à de produção) | http://localhost:4200 (rebuild: `docker compose up -d --build web` no openpmo-api) |
+| Testes unitários | `./test-docker.sh` (Karma em container com Chromium) |
+| Configuração usada no modo dev | `openpmo-api/docker/web/app-config-dev.json` e `proxy.conf.json` |
+
+
 O produto é composto por 3 componentes:
 
 * Frontend Angular, montado a partir do repositório no github
