@@ -7,6 +7,7 @@ import { ITheme } from './app/shared/interfaces/ITheme';
 import { resolveTheme } from './app/shared/themes/themes';
 import { APP_CONFIG } from './app/shared/tokens/AppConfigToken';
 import { environment } from './environments/environment';
+import { buildTargetUrl, resolveHandoffRoute } from './app/shared/utils/portal-handoff';
 
 if (environment.production) {
   enableProdMode();
@@ -81,7 +82,15 @@ const configListener = ({ target }) => {
     return;
   }
 
-  fetchThemeName(appConfig).then(themeName => bootstrap(appConfig, themeName));
+  // Entrada pelo portal SIPGR (?handoff=): troca o código pela sessão e recarrega sem ele na URL.
+  resolveHandoffRoute(appConfig, window.location.search, (url, init) => fetch(url, init))
+    .then(route => {
+      if (route) {
+        window.location.replace(buildTargetUrl(window.location.origin, window.location.pathname, route));
+        return;
+      }
+      fetchThemeName(appConfig).then(themeName => bootstrap(appConfig, themeName));
+    });
 };
 
 const configFailed = () => {
