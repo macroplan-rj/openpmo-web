@@ -7,4 +7,6 @@ export interface IAppConfig {
     'pt-BR': string;
   };
   theme?: string;
+  /** Backend do portal SIPGR (troca do código ?handoff=). Sem ele, o login pelo portal fica desligado. */
+  portalApi?: string;
 }
