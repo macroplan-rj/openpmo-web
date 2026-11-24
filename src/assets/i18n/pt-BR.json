@@ -710,6 +710,14 @@
       "thereAreNotCostAccounts": "Não existem centros de custo"
     },
     "error": {
+      "painelToken": {
+        "name": {
+          "invalid": "Informe um nome de até 100 caracteres para o token."
+        },
+        "not": {
+          "found": "Token não encontrado."
+        }
+      },
       "citizen": {
         "not": {
           "found": "O usuário informado precisa possuir ou criar uma conta no Acesso Cidadão."
@@ -1213,5 +1221,25 @@
   "dynamicSelectionDependsOn": "Depende de",
   "dynamicSelectionHelpDependsOn": "Outro campo de seleção dinâmica deste modelo. Ao mudar o valor dele, as opções deste campo são filtradas.",
   "dynamicSelectionListName": "Nome da lista",
-  "dynamicSelectionNewList": "Nova lista"
+  "dynamicSelectionNewList": "Nova lista",
+  "painelApiTokens": "Tokens da API",
+  "painelApiTokenHint": "Tokens de leitura da API do Painel Estratégico, enviados no cabeçalho X-Api-Key.",
+  "painelApiTokenNew": "Gerar token",
+  "painelApiTokenName": "Nome (quem vai usar o token)",
+  "painelApiTokenPrefix": "Início do token",
+  "painelApiTokenCreatedBy": "Gerado por",
+  "painelApiTokenCreatedAt": "Gerado em",
+  "painelApiTokenLastUsed": "Último uso",
+  "painelApiTokenNeverUsed": "Nunca usado",
+  "painelApiTokenRevoked": "Revogado",
+  "painelApiTokenRevoke": "Revogar",
+  "painelApiTokenRevokeQuestion": "Revogar token",
+  "painelApiTokenRevokeConfirmation": "Quem usa este token perde o acesso na hora e isso não pode ser desfeito. Revogar o token",
+  "painelApiTokenRevokedMessage": "Token revogado.",
+  "painelApiTokenGeneratedTitle": "Token gerado",
+  "painelApiTokenGeneratedWarning": "Copie o token agora. Depois de fechar esta janela ele não será mostrado de novo.",
+  "painelApiTokenCopy": "Copiar",
+  "painelApiTokenCopied": "Token copiado.",
+  "painelApiTokenCopyFailed": "Não foi possível copiar. Selecione o token e copie manualmente.",
+  "painelApiTokenEmpty": "Nenhum token gerado."
 }

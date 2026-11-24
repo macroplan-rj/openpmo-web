@@ -2,4 +2,4 @@ export const officeConfigurationPaths  = [ 'strategies', 'organizations', 'dynam
 
 export const plansPath = [ 'plan', 'workpack', 'stakeholder', 'reports', 'ccbmember-baselines-view', 'filter-dataview', 'persons/profile', 'search'];
 
-export const adminsPath = [ 'domains' , 'administrators', 'administration', 'measure-units'];
+export const adminsPath = [ 'domains' , 'administrators', 'administration', 'measure-units', 'painel-tokens'];

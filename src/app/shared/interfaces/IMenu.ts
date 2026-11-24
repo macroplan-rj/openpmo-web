@@ -16,7 +16,8 @@ export enum MenuAdminButtons {
   DOMAINS = 'domains',
   ADMINISTRATORS = 'administrators',
   ADMINISTRATION = 'administration',
-  MEASURE_UNITS = 'measure-units'
+  MEASURE_UNITS = 'measure-units',
+  PAINEL_TOKENS = 'painel-tokens'
 }
 
 export enum MenuOfficeConfigurationButtons {

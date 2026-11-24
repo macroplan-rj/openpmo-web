@@ -93,5 +93,9 @@
     [pTooltip]="'measureUnits' | translate">
     <i class="app-icon unit-selection-alt" [ngStyle]="{ fontSize: '.7rem' }"></i>
   </div>
+  <div class="item" [routerLink]="['/painel-tokens']" [class.adm-opened]="isMenuAdminOpen(MenuAdminButtons.PAINEL_TOKENS)"
+    [pTooltip]="'painelApiTokens' | translate">
+    <i class="fa-icon fas fa-key" [ngStyle]="{ fontSize: '1.2rem' }"></i>
+  </div>
 </ng-template>
 

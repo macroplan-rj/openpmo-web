@@ -96,6 +96,11 @@ const routes: Routes = [
     loadChildren: () => import('./modules/person/person.module').then(m => m.PersonModule)
   },
   {
+    path: 'painel-tokens',
+    canActivate: [ AuthGuard ],
+    loadChildren: () => import('./modules/painel-token/painel-token.module').then(m => m.PainelTokenModule)
+  },
+  {
     path: 'administrators',
     canActivate: [ AuthGuard ],
     loadChildren: () => import('./modules/administrator/administrator.module').then(m => m.AdministratorModule)

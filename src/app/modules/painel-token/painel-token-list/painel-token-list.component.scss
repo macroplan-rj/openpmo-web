@@ -1,0 +1,90 @@
+.app-painel-token-list {
+  width: 100%;
+
+  .loading-container {
+    position: relative;
+    min-height: 150px;
+  }
+
+  .header-container {
+    display: flex;
+    flex-direction: row;
+  }
+  .app-content-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    flex: 1;
+    span {
+      text-transform: uppercase;
+    }
+  }
+  .header-container.mobile {
+    flex-direction: column;
+  }
+  .mobile {
+    width: 100%;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    &.mobile {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .hint {
+      opacity: .75;
+    }
+  }
+
+  .token-form {
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+    input {
+      width: 100%;
+    }
+    .form-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+    }
+  }
+
+  .col-prefix {
+    width: 10rem;
+  }
+  .col-date {
+    width: 10rem;
+  }
+  .col-status {
+    width: 7rem;
+  }
+  .col-actions {
+    width: 4rem;
+    text-align: right;
+  }
+  tr.revoked td {
+    opacity: .55;
+  }
+
+  .generated-name {
+    font-weight: 600;
+    margin-top: 0;
+  }
+  .generated-warning {
+    margin-bottom: 1rem;
+  }
+  .generated-value {
+    display: flex;
+    gap: .5rem;
+    input {
+      flex: 1;
+      min-width: 0;
+      font-family: monospace;
+    }
+  }
+}

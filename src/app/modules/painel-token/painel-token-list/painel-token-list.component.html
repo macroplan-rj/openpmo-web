@@ -1,0 +1,88 @@
+<div class="app-painel-token-list">
+  <p-confirmDialog [header]="'painelApiTokenRevokeQuestion' | translate" icon="pi pi-exclamation-triangle"
+    key="painelTokenRevokeConfirm"></p-confirmDialog>
+
+  <div class="header-container" [class.mobile]="responsive">
+    <div class="app-content-header" [class.mobile]="responsive">
+      <span>{{ 'painelApiTokens' | translate }}</span>
+    </div>
+  </div>
+  <div class="card-container">
+    <app-card [properties]="{ toggleable: false, initialStateToggle: false, cardTitle: '', collapseble: false, initialStateCollapse: false }" class="mt-0">
+      <div class="loading-container" *ngIf="isLoading">
+        <app-card-loading [isCardLoading]="isLoading"></app-card-loading>
+      </div>
+      <ng-container *ngIf="!isLoading">
+        <div class="toolbar" [class.mobile]="responsive">
+          <span class="hint">{{ 'painelApiTokenHint' | translate }}</span>
+          <button type="button" pButton icon="pi pi-plus" iconPos="left" class="p-button-outlined"
+            [label]="'painelApiTokenNew' | translate" [disabled]="showForm" (click)="handleNew()"></button>
+        </div>
+
+        <form class="token-form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="handleGenerate()">
+          <div class="p-grid">
+            <span class="p-float-label p-col-12">
+              <input id="painelTokenName" type="text" pInputText formControlName="name" [attr.maxlength]="nameMaxLength">
+              <label for="painelTokenName">{{ 'painelApiTokenName' | translate }} *</label>
+            </span>
+          </div>
+          <div class="form-buttons">
+            <button type="button" pButton class="p-button-outlined" [label]="'cancel' | translate" (click)="handleCancel()"></button>
+            <button type="submit" pButton [label]="'painelApiTokenNew' | translate" [disabled]="form.invalid || isSaving"></button>
+          </div>
+        </form>
+
+        <p-table [value]="tokens" [paginator]="tokens.length > 20" [rows]="20" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>{{ 'name' | translate }}</th>
+              <th class="col-prefix">{{ 'painelApiTokenPrefix' | translate }}</th>
+              <th>{{ 'painelApiTokenCreatedBy' | translate }}</th>
+              <th class="col-date">{{ 'painelApiTokenCreatedAt' | translate }}</th>
+              <th class="col-date">{{ 'painelApiTokenLastUsed' | translate }}</th>
+              <th class="col-status">{{ 'status' | translate }}</th>
+              <th class="col-actions"></th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-token>
+            <tr [class.revoked]="!token.active">
+              <td>{{ token.name }}</td>
+              <td class="col-prefix"><code>{{ token.prefix }}…</code></td>
+              <td>{{ token.createdBy }}</td>
+              <td class="col-date">{{ toDate(token.createdAt) | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="col-date">
+                <ng-container *ngIf="token.lastUsedAt; else neverUsed">{{ toDate(token.lastUsedAt) | date:'dd/MM/yyyy HH:mm' }}</ng-container>
+                <ng-template #neverUsed>{{ 'painelApiTokenNeverUsed' | translate }}</ng-template>
+              </td>
+              <td class="col-status">
+                <span *ngIf="token.active">{{ 'active' | translate }}</span>
+                <span *ngIf="!token.active"
+                  [pTooltip]="token.revokedBy + ' · ' + (toDate(token.revokedAt) | date:'dd/MM/yyyy HH:mm')">{{ 'painelApiTokenRevoked' | translate }}</span>
+              </td>
+              <td class="col-actions">
+                <button type="button" pButton icon="fas fa-ban" class="p-button-text p-button-sm p-button-danger"
+                  *ngIf="token.active" [pTooltip]="'painelApiTokenRevoke' | translate" (click)="handleRevoke(token)"></button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="7">{{ 'painelApiTokenEmpty' | translate }}</td></tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+    </app-card>
+  </div>
+
+  <p-dialog [(visible)]="showGenerated" [modal]="true" [closable]="false" [draggable]="false" [resizable]="false"
+    [header]="'painelApiTokenGeneratedTitle' | translate" [style]="{ width: '640px', maxWidth: '95vw' }">
+    <p class="generated-name">{{ generatedName }}</p>
+    <p class="generated-warning"><i class="pi pi-exclamation-triangle"></i> {{ 'painelApiTokenGeneratedWarning' | translate }}</p>
+    <div class="generated-value">
+      <input type="text" pInputText readonly [value]="generatedToken || ''" (focus)="$any($event.target).select()">
+      <button type="button" pButton icon="pi pi-copy" [label]="'painelApiTokenCopy' | translate" (click)="handleCopy()"></button>
+    </div>
+    <ng-template pTemplate="footer">
+      <button type="button" pButton class="p-button-outlined" [label]="'close' | translate" (click)="handleCloseGenerated()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
